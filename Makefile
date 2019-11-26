@@ -77,7 +77,7 @@ GLOG_PATH = $(THIRD_PATH)/glog
 endif
 
 ifndef BLACKWIDOW_PATH
-BLACKWIDOW_PATH = $(THIRD_PATH)/blackwidow
+BLACKWIDOW_PATH = $(THIRD_PATH)/blackwidow_ibn
 endif
 BLACKWIDOW = $(BLACKWIDOW_PATH)/lib/libblackwidow$(DEBUG_SUFFIX).a
 
