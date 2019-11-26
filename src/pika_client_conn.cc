@@ -178,12 +178,28 @@ std::string PikaClientConn::DoCmd(const PikaCmdArgsType& argv,
       uint64_t logic_id = 0;
       g_pika_server->logger_->GetProducerStatus(&filenum, &offset, &logic_id);
 
-      std::string binlog = c_ptr->ToBinlog(argv,
-                                           exec_time,
-                                           g_pika_conf->server_id(),
-                                           logic_id,
-                                           filenum,
-                                           offset);
+      //start ibn
+      std::string binlog;
+      if (opt == kCmdNameBNStream) {
+        binlog = c_ptr->ToBinlog(*c_ptr->res().new_argv,
+                                 exec_time,
+                                 g_pika_conf->server_id(),
+                                 logic_id,
+                                 filenum,
+                                 offset);
+        delete c_ptr->res().new_argv;
+        c_ptr->res().new_argv = NULL;
+      }
+      //end ibn
+      else {
+        binlog = c_ptr->ToBinlog(argv,
+                                 exec_time,
+                                 g_pika_conf->server_id(),
+                                 logic_id,
+                                 filenum,
+                                 offset);
+      }
+
       slash::Status s;
       if (!binlog.empty()) {
         s = g_pika_server->logger_->Put(binlog);
@@ -197,6 +213,15 @@ std::string PikaClientConn::DoCmd(const PikaCmdArgsType& argv,
       }
     }
   }
+  //start ibn
+  else if (
+          c_ptr->res().ok() &&
+          opt == kCmdNameBNStream
+          ) {
+    delete c_ptr->res().new_argv;
+    c_ptr->res().new_argv = NULL;
+  }
+  //end ibn
 
   if (!cinfo_ptr->is_suspend()) {
     g_pika_server->RWUnlock();

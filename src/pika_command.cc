@@ -13,6 +13,7 @@
 #include "include/pika_hyperloglog.h"
 #include "include/pika_geo.h"
 #include "include/pika_pubsub.h"
+#include "include/pika_ibn.h"
 
 static std::unordered_map<std::string, CmdInfo*> cmd_infos(300);    /* Table for CmdInfo */
 
@@ -235,6 +236,24 @@ void InitCmdInfoTable() {
   ////PKHRScanRange
   CmdInfo* pkhrscanrange = new CmdInfo(kCmdNamePKHRScanRange, -4, kCmdFlagsRead | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNamePKHRScanRange, pkhrscanrange));
+
+  //start ibn
+  ////BNHMin
+  CmdInfo* hminptr = new CmdInfo(kCmdNameBNHMin, 4, kCmdFlagsWrite | kCmdFlagsHash);
+  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHMin, hminptr));
+  ////BNHMax
+  CmdInfo* hmaxptr = new CmdInfo(kCmdNameBNHMax, 4, kCmdFlagsWrite | kCmdFlagsHash);
+  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHMax, hmaxptr));
+  ////BNHTIndex
+  CmdInfo* htindexptr = new CmdInfo(kCmdNameBNHTIndex, 4, kCmdFlagsWrite | kCmdFlagsHash);
+  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHTIndex, htindexptr));
+  ////BNStream
+  CmdInfo* streamptr = new CmdInfo(kCmdNameBNStream, -3, kCmdFlagsWrite | kCmdFlagsKv);
+  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNStream, streamptr));
+  ////BNMSetex
+  CmdInfo* msetexptr = new CmdInfo(kCmdNameBNMSetex, -4, kCmdFlagsWrite | kCmdFlagsKv);
+  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNMSetex, msetexptr));
+  //end ibn
 
   //List
   ////LIndex
@@ -680,6 +699,19 @@ void InitCmdTable(std::unordered_map<std::string, Cmd*> *cmd_table) {
   ////PKHRScanRange
   Cmd* pkhrscanrangeptr = new PKHRScanRangeCmd();
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNamePKHRScanRange, pkhrscanrangeptr));
+
+  //start ibn
+  Cmd* hminptr = new BNHMinCmd();
+  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHMin, hminptr));
+  Cmd* hmaxptr = new BNHMaxCmd();
+  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHMax, hmaxptr));
+  Cmd* htindexptr = new BNHTIndexCmd();
+  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHTIndex, htindexptr));
+  Cmd* streamptr = new BNStreamCmd();
+  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNStream, streamptr));
+  Cmd* msetexptr = new BNMSetexCmd();
+  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNMSetex, msetexptr));
+  //end ibn
 
   //List
   Cmd* lindexptr = new LIndexCmd();

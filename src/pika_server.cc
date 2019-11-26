@@ -322,6 +322,10 @@ void PikaServer::Start() {
 
 
   time(&start_time_s_);
+  //start ibn
+  bnstream_offset_ = (uint32_t)start_time_s_;
+  bnstream_counter_ = 0;
+  //end ibn
 
   std::string slaveof = g_pika_conf->slaveof();
   if (!slaveof.empty()) {
@@ -350,8 +354,20 @@ void PikaServer::Start() {
   }
 
   LOG(INFO) << "Pika Server going to start";
+  //start ibn
+  int bnstream_check_counter = 0;
+  //end ibn
   while (!exit_) {
     DoTimingTask();
+    //start ibn
+    if ((++bnstream_check_counter) >= 259200) { //大概一个月的时间更新一次offset&counter
+      bnstream_lock_.WriteLock();
+      bnstream_offset_ = (uint32_t)time(NULL);
+      bnstream_counter_ = 0;
+      bnstream_lock_.WriteUnlock();
+      bnstream_check_counter = 0;
+    }
+    //end ibn
     // wake up every 10 second
     int try_num = 0;
     while (!exit_ && try_num++ < 10) {

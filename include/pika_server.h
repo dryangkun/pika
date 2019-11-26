@@ -405,6 +405,18 @@ class PikaServer {
 
   void SetDispatchQueueLimit(int queue_limit);
 
+  //start ibn
+  slash::RWMutex* BNStreamRWLock() {
+    return &bnstream_lock_;
+  }
+  uint32_t BNStreamOffset() {
+    return bnstream_offset_;
+  }
+  uint64_t BNStreamCounter() {
+    return bnstream_counter_++;
+  }
+  //end ibn
+
  private:
   std::atomic<bool> exit_;
   std::atomic<bool> binlog_io_error_;
@@ -414,6 +426,11 @@ class PikaServer {
   std::shared_ptr<blackwidow::BlackWidow> db_;
 
   time_t start_time_s_;
+  //start ibn
+  slash::RWMutex bnstream_lock_;
+  uint32_t bnstream_offset_;
+  std::atomic<uint64_t> bnstream_counter_;
+  //end ibn
   bool have_scheduled_crontask_;
   struct timeval last_check_compact_time_;
 

@@ -207,6 +207,14 @@ const std::string kCmdNamePubSub = "pubsub";
 const std::string kCmdNamePSubscribe = "psubscribe";
 const std::string kCmdNamePUnSubscribe = "punsubscribe";
 
+//start ibn
+const std::string kCmdNameBNHMin = "bnhmin";
+const std::string kCmdNameBNHMax = "bnhmax";
+const std::string kCmdNameBNHTIndex = "bnhtindex";
+const std::string kCmdNameBNStream = "bnstream";
+const std::string kCmdNameBNMSetex = "bnmsetex";
+//end ibn
+
 typedef pink::RedisCmdArgsType PikaCmdArgsType;
 static const int RAW_ARGS_LEN = 1024 * 1024; 
 
@@ -327,6 +335,9 @@ public:
   void clear() {
     message_.clear();
     ret_ = kNone;
+    //start ibn
+    new_argv = NULL;
+    //end ibn
   }
   std::string raw_message() const {
     return message_;
@@ -417,6 +428,9 @@ public:
       message_ = content;
     }
   }
+  //start ibn
+  PikaCmdArgsType *new_argv;
+  //end ibn
 
 private:
   std::string message_;
