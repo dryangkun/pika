@@ -77,6 +77,10 @@ class RedisStrings : public Redis {
                       const Slice& pattern, int32_t limit,
                       std::vector<KeyValue>* kvs, std::string* next_key);
 
+  //start ibn
+  Status BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl);
+  //end ibn
+
   // Keys Commands
   Status Expire(const Slice& key, int32_t ttl) override;
   Status Del(const Slice& key) override;
