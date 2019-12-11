@@ -94,32 +94,15 @@ namespace blackwidow {
       return s;
     }
 
-    static int32_t htIndexValueTTL = 7 * 86400;
-    static Slice htIndexValueEmpty = Slice("");
-
-    static const Slice htIndexEncode(const Slice &key, int prefix_length, int64_t value) {
-      std::string keyStr = key.ToString();
-      char valueStr[17];
-      sprintf(valueStr, "%016" PRIx64 "", value);
-
-      //".ht" . chr(255) . prefix(key) . chr(255) . hex(value) . chr(255) . suffix(key)
-      std::string buf;
-      buf.reserve(key.size() + 23);
-      buf.append(".ht");
-      buf += (unsigned char) 255;
-      buf.append(keyStr.substr(0, prefix_length));
-      buf += (unsigned char) 255;
-      buf.append(valueStr);
-      buf += (unsigned char) 255;
-      buf.append(keyStr.substr(prefix_length));
-      return Slice(buf);
+    LockMgr* BNHTLockMgr() {
+      return lock_mgr_;
     }
 
-    Status RedisHashes::BNHTIndex(const Slice &key, const Slice &field,
-                                  int64_t value, int32_t *res, int prefix_length,
-                                  RedisStrings *strings_db) {
+    Status RedisHashes::BNHTSetInternal(const Slice& key, const Slice& field,
+                                        int64_t value, int64_t* res) {
+      *res = 0; //0=默认值；-1=新值；-2=值相同；正数=老时间戳
       rocksdb::WriteBatch batch;
-      ScopeRecordLock l(lock_mgr_, key);
+//      ScopeRecordLock l(lock_mgr_, key);
 
       int32_t version = 0;
       uint32_t statistic = 0;
@@ -133,13 +116,10 @@ namespace blackwidow {
           parsed_hashes_meta_value.set_count(1);
           batch.Put(handles_[0], key, meta_value);
           HashesDataKey data_key(key, version, field);
-
           char buf[32];
           Int64ToStr(buf, 32, value);
           batch.Put(handles_[1], data_key.Encode(), buf);
-
-          //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
-          *res = 1;
+          *res = -1;
         } else {
           version = parsed_hashes_meta_value.version();
           std::string data_value;
@@ -152,28 +132,23 @@ namespace blackwidow {
               return Status::Corruption("hash value is not an integer");
             }
 
-            *res = 0;
             if (value == ival) {
+              *res = -2;
               return Status::OK();
             } else {
               char buf[32];
               Int64ToStr(buf, 32, value);
               batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+              *res = ival;
               statistic++;
-
-              //strings_db->Del(htIndexEncode(key, prefix_length, ival));
-              //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
             }
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);
             batch.Put(handles_[0], key, meta_value);
-
             char buf[32];
             Int64ToStr(buf, 32, value);
             batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-
-            //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
-            *res = 1;
+            *res = -1;
           } else {
             return s;
           }
@@ -185,13 +160,10 @@ namespace blackwidow {
         version = meta_value.UpdateVersion();
         batch.Put(handles_[0], key, meta_value.Encode());
         HashesDataKey data_key(key, version, field);
-
         char buf[32];
         Int64ToStr(buf, 32, value);
         batch.Put(handles_[1], data_key.Encode(), buf);
-
-        //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
-        *res = 1;
+        *res = -1;
       } else {
         return s;
       }
