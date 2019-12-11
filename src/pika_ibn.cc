@@ -63,6 +63,27 @@ void BNHMaxCmd::Do() {
   return;
 }
 
+static int32_t bnhtIndexValueTTL = 7 * 86400;
+static Slice bnhtIndexValueEmpty = Slice("");
+
+static const Slice bnhtIndexEncode(const Slice &key, int prefix_length, int64_t value) {
+  std::string keyStr = key.ToString();
+  char valueStr[17];
+  sprintf(valueStr, "%016" PRIx64 "", value);
+
+  //".ht" . chr(255) . prefix(key) . chr(255) . hex(value) . chr(255) . suffix(key)
+  std::string buf;
+  buf.reserve(key.size() + 23);
+  buf.append(".ht");
+  buf += (unsigned char) 255;
+  buf.append(keyStr.substr(0, prefix_length));
+  buf += (unsigned char) 255;
+  buf.append(valueStr);
+  buf += (unsigned char) 255;
+  buf.append(keyStr.substr(prefix_length));
+  return Slice(buf);
+}
+
 void BNHTIndexCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
   if (!ptr_info->CheckArg(argv.size())) {
     res_.SetRes(CmdRes::kWrongNum, kCmdNameBNHTIndex);
@@ -95,14 +116,26 @@ void BNHTIndexCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const p
 }
 
 void BNHTIndexCmd::Do() {
-  int32_t ret = 0;
-  rocksdb::Status s = g_pika_server->db()->BNHTIndex(key_, field_, value_, &ret, prefix_length_);
-  if (s.ok()) {
-    res_.AppendContent(":" + std::to_string(ret));
-  } else {
+  int64_t old_value = 0;
+  rocksdb::Status s = g_pika_server->db()->BNHTIndexGetSet(key_, field_, value_, &old_value);
+  if (!s.ok()) {
     res_.SetRes(CmdRes::kErrOther, s.ToString());
+    return;
   }
-  return;
+
+  if (old_value == -1) { //新值
+    const Slice htKey1 = htIndexEncode(key_, prefix_length_, value_);
+    g_pika_server->db()->Setex(htKey1, bnhtIndexValueEmpty, bnhtIndexValueTTL);
+  } else if (old_value > 0) { //老值
+    std::vector <std::string> htKeys;
+    const Slice htKey1 = htIndexEncode(key_, prefix_length_, old_value);
+    htKeys.push_back(htKey1);
+    g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kStrings);
+
+    const Slice htKey2 = htIndexEncode(key_, prefix_length_, value_);
+    g_pika_server->db()->Setex(htKey2, bnhtIndexValueEmpty, bnhtIndexValueTTL);
+  }
+  res_.AppendContent(":" + std::to_string(ret));
 }
 
 static std::string streamValueTTLStr("604800");

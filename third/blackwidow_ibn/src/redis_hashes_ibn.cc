@@ -92,15 +92,11 @@ namespace blackwidow {
       return s;
     }
 
-    LockMgr* RedisHashes::BNHTLockMgr() {
-      return lock_mgr_;
-    }
-
-    Status RedisHashes::BNHTSetInternal(const Slice& key, const Slice& field,
-                                        int64_t value, int64_t* res) {
-      *res = 0; //0=默认值；-1=新值；-2=值相同；正数=老时间戳
+    Status RedisHashes::BNHTIndexGetSet(const Slice& key, const Slice& field, int64_t value, int64_t *res) {
+      //ret: -1=新值; -2=值不变; 正数=老值;
+      *res = 0;
       rocksdb::WriteBatch batch;
-//      ScopeRecordLock l(lock_mgr_, key);
+      ScopeRecordLock l(lock_mgr_, key);
 
       int32_t version = 0;
       uint32_t statistic = 0;

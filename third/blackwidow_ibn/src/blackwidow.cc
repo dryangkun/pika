@@ -3,11 +3,6 @@
 //  LICENSE file in the root directory of this source tree. An additional grant
 //  of patent rights can be found in the PATENTS file in the same directory.
 
-#ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS
-#endif
-#include <inttypes.h>
-
 #include "blackwidow/blackwidow.h"
 #include "blackwidow/util.h"
 
@@ -371,56 +366,12 @@ Status BlackWidow::PKHRScanRange(const Slice& key, const Slice& field_start,
 
 //start ibn
 Status BlackWidow::BNHMinOrMax(const Slice& key, const Slice& field,
-                             int64_t value, int32_t* res, bool is_min) {
+                               int64_t value, int32_t* res, bool is_min) {
   return hashes_db_->BNHMinOrMax(key, field, value, res, is_min);
 }
 
-static int32_t htIndexValueTTL = 7 * 86400;
-static Slice htIndexValueEmpty = Slice("");
-
-static const Slice htIndexEncode(const Slice &key, int prefix_length, int64_t value) {
-  std::string keyStr = key.ToString();
-  char valueStr[17];
-  sprintf(valueStr, "%016" PRIx64 "", value);
-
-  //".ht" . chr(255) . prefix(key) . chr(255) . hex(value) . chr(255) . suffix(key)
-  std::string buf;
-  buf.reserve(key.size() + 23);
-  buf.append(".ht");
-  buf += (unsigned char) 255;
-  buf.append(keyStr.substr(0, prefix_length));
-  buf += (unsigned char) 255;
-  buf.append(valueStr);
-  buf += (unsigned char) 255;
-  buf.append(keyStr.substr(prefix_length));
-  return Slice(buf);
-}
-
-Status BlackWidow::BNHTIndex(const Slice& key, const Slice& field,
-                           int64_t value, int32_t* res, int prefix_length) {
-  ScopeRecordLock l(hashes_db_->BNHTLockMgr(), key);
-
-  int64_t old_value = 0;
-  Status s = hashes_db_->BNHTSetInternal(key, field, value, &old_value);
-  if (s.ok()) {
-    switch (old_value) {
-      case -1: //新值
-        *res = 1;
-        strings_db_->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
-        break;
-      case -2: //值不变
-        *res = 0;
-        break;
-      case 0: //impossible
-        break;
-      default:
-        *res = 0;
-        strings_db_->Del(htIndexEncode(key, prefix_length, old_value));
-        strings_db_->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
-        break;
-    }
-  }
-  return s;
+Status BlackWidow::BNHTIndexGetSet(const Slice& key, const Slice& field, int64_t value, int64_t *res) {
+  return hashes_db_->BNHTIndexGetSet(key, field, value, res);
 }
 
 Status BlackWidow::BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl) {
