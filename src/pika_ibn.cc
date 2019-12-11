@@ -136,7 +136,7 @@ void BNHTIndexCmd::Do() {
 //    g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kHashes);
 
     const rocksdb::Slice htKey2 = bnhtIndexEncode(key_, prefix_length_, value_);
-    g_pika_server->db()->Setex(htKey1, bnhtIndexValueEmpty, bnhtIndexValueTTL);
+    g_pika_server->db()->Setex(htKey2, bnhtIndexValueEmpty, bnhtIndexValueTTL);
   }
   res_.AppendContent(":" + std::to_string(ret));
 }
