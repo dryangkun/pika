@@ -63,7 +63,7 @@ void BNHMaxCmd::Do() {
   return;
 }
 
-static Slice bnhtIndexValueEmpty = Slice("");
+static rocksdb::Slice bnhtIndexValueEmpty = rocksdb::Slice("");
 
 static const rocksdb::Slice bnhtIndexEncode(const rocksdb::Slice &key, int prefix_length, int64_t value) {
   std::string keyStr = key.ToString();
