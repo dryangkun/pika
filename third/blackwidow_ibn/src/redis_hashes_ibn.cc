@@ -10,8 +10,6 @@
 #include "src/base_filter.h"
 #include "src/scope_record_lock.h"
 #include "src/scope_snapshot.h"
-#include "src/strings_value_format.h"
-#include "src/redis_strings.h"
 
 namespace blackwidow {
 
@@ -94,7 +92,7 @@ namespace blackwidow {
       return s;
     }
 
-    LockMgr* BNHTLockMgr() {
+    LockMgr* RedisHashes::BNHTLockMgr() {
       return lock_mgr_;
     }
 
