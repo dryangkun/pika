@@ -406,7 +406,7 @@ Status BlackWidow::BNHTIndex(const Slice& key, const Slice& field,
     switch (old_value) {
       case -1: //新值
         *res = 1;
-        strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
+        strings_db_->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
         break;
       case -2: //值不变
         *res = 0;
@@ -415,8 +415,8 @@ Status BlackWidow::BNHTIndex(const Slice& key, const Slice& field,
         break;
       default:
         *res = 0;
-        strings_db->Del(htIndexEncode(key, prefix_length, old_value));
-        strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
+        strings_db_->Del(htIndexEncode(key, prefix_length, old_value));
+        strings_db_->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
         break;
     }
   }
