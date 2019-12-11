@@ -130,10 +130,8 @@ void BNHTIndexCmd::Do() {
     const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, value_);
     g_pika_server->db()->Setex(htKey1, bnhtIndexValueEmpty, bnhtIndexValueTTL);
   } else if (old_value > 0) { //老值
-    std::vector <std::string> htKeys;
     const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, old_value);
-    htKeys.push_back(htKey1.ToString());
-    g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kStrings);
+    g_pika_server->db()->PKSetexAt(htKey1, bnhtIndexValueEmpty, 1);
 
     const rocksdb::Slice htKey2 = bnhtIndexEncode(key_, prefix_length_, value_);
     g_pika_server->db()->Setex(htKey2, bnhtIndexValueEmpty, bnhtIndexValueTTL);
