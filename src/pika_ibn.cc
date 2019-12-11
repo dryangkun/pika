@@ -131,7 +131,7 @@ void BNHTIndexCmd::Do() {
   } else if (old_value > 0) { //老值
     std::vector <std::string> htKeys;
     const rocksdb::Slice htKey1 = htIndexEncode(key_, prefix_length_, old_value);
-    htKeys.push_back(htKey1);
+    htKeys.push_back(htKey1.ToString());
     g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kStrings);
 
     const rocksdb::Slice htKey2 = htIndexEncode(key_, prefix_length_, value_);
