@@ -123,7 +123,9 @@ void BNHTIndexCmd::Do() {
     return;
   }
 
+  int32_t ret = 0;
   if (old_value == -1) { //新值
+    ret = 1;
     const Slice htKey1 = htIndexEncode(key_, prefix_length_, value_);
     g_pika_server->db()->Setex(htKey1, bnhtIndexValueEmpty, bnhtIndexValueTTL);
   } else if (old_value > 0) { //老值
