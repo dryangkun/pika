@@ -64,9 +64,9 @@ void BNHMaxCmd::Do() {
 }
 
 static int32_t bnhtIndexValueTTL = 7 * 86400;
-static slash::Slice bnhtIndexValueEmpty = slash::Slice("");
+static rocksdb::Slice bnhtIndexValueEmpty = rocksdb::Slice("");
 
-static const slash::Slice bnhtIndexEncode(const slash::Slice &key, int prefix_length, int64_t value) {
+static const rocksdb::Slice bnhtIndexEncode(const rocksdb::Slice &key, int prefix_length, int64_t value) {
   std::string keyStr = key.ToString();
   char valueStr[17];
   sprintf(valueStr, "%016" PRIx64 "", value);
@@ -81,7 +81,7 @@ static const slash::Slice bnhtIndexEncode(const slash::Slice &key, int prefix_le
   buf.append(valueStr);
   buf += (unsigned char) 255;
   buf.append(keyStr.substr(prefix_length));
-  return slash::Slice(buf);
+  return rocksdb::Slice(buf);
 }
 
 void BNHTIndexCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
@@ -126,15 +126,15 @@ void BNHTIndexCmd::Do() {
   int32_t ret = 0;
   if (old_value == -1) { //新值
     ret = 1;
-    const slash::Slice htKey1 = htIndexEncode(key_, prefix_length_, value_);
+    const rocksdb::Slice htKey1 = htIndexEncode(key_, prefix_length_, value_);
     g_pika_server->db()->Setex(htKey1, bnhtIndexValueEmpty, bnhtIndexValueTTL);
   } else if (old_value > 0) { //老值
     std::vector <std::string> htKeys;
-    const slash::Slice htKey1 = htIndexEncode(key_, prefix_length_, old_value);
+    const rocksdb::Slice htKey1 = htIndexEncode(key_, prefix_length_, old_value);
     htKeys.push_back(htKey1);
     g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kStrings);
 
-    const slash::Slice htKey2 = htIndexEncode(key_, prefix_length_, value_);
+    const rocksdb::Slice htKey2 = htIndexEncode(key_, prefix_length_, value_);
     g_pika_server->db()->Setex(htKey2, bnhtIndexValueEmpty, bnhtIndexValueTTL);
   }
   res_.AppendContent(":" + std::to_string(ret));
