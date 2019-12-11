@@ -401,7 +401,7 @@ Status BlackWidow::BNHTIndex(const Slice& key, const Slice& field,
   ScopeRecordLock l(hashes_db_->BNHTLockMgr(), key);
 
   int64_t old_value = 0;
-  Status s = hashes_db_->BNHTSetInternal(key, field, valie, &old_value);
+  Status s = hashes_db_->BNHTSetInternal(key, field, value, &old_value);
   if (s.ok()) {
     switch (old_value) {
       case -1: //新值
