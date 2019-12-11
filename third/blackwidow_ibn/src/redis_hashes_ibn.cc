@@ -138,7 +138,7 @@ namespace blackwidow {
           Int64ToStr(buf, 32, value);
           batch.Put(handles_[1], data_key.Encode(), buf);
 
-          strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
+          //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
           *res = 1;
         } else {
           version = parsed_hashes_meta_value.version();
@@ -161,8 +161,8 @@ namespace blackwidow {
               batch.Put(handles_[1], hashes_data_key.Encode(), buf);
               statistic++;
 
-              strings_db->Del(htIndexEncode(key, prefix_length, ival));
-              strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
+              //strings_db->Del(htIndexEncode(key, prefix_length, ival));
+              //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
             }
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);
@@ -172,7 +172,7 @@ namespace blackwidow {
             Int64ToStr(buf, 32, value);
             batch.Put(handles_[1], hashes_data_key.Encode(), buf);
 
-            strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
+            //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
             *res = 1;
           } else {
             return s;
@@ -190,7 +190,7 @@ namespace blackwidow {
         Int64ToStr(buf, 32, value);
         batch.Put(handles_[1], data_key.Encode(), buf);
 
-        strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
+        //strings_db->Setex(htIndexEncode(key, prefix_length, value), htIndexValueEmpty, htIndexValueTTL);
         *res = 1;
       } else {
         return s;
