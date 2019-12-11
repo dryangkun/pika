@@ -127,7 +127,8 @@ void BNHTIndexCmd::Do() {
   if (old_value == -1) { //新值
     ret = 1;
     const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, value_);
-    g_pika_server->db()->HSet(htKey1, bnhtIndexValueEmpty, bnhtIndexValueEmpty);
+    int32_t res = 0;
+    g_pika_server->db()->HSet(htKey1, bnhtIndexValueEmpty, bnhtIndexValueEmpty, &res);
   } else if (old_value > 0) { //老值
     std::vector <std::string> htKeys;
     const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, old_value);
@@ -135,7 +136,8 @@ void BNHTIndexCmd::Do() {
     g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kHashes);
 
     const rocksdb::Slice htKey2 = bnhtIndexEncode(key_, prefix_length_, value_);
-    g_pika_server->db()->HSet(htKey2, bnhtIndexValueEmpty, bnhtIndexValueEmpty);
+    int32_t res = 0;
+    g_pika_server->db()->HSet(htKey2, bnhtIndexValueEmpty, bnhtIndexValueEmpty, &res);
   }
   res_.AppendContent(":" + std::to_string(ret));
 }
