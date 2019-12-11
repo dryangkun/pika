@@ -63,13 +63,11 @@ void BNHMaxCmd::Do() {
   return;
 }
 
-static int32_t bnhtIndexValueTTL = 7 * 86400;
-static rocksdb::Slice bnhtIndexValueEmpty = rocksdb::Slice("");
-
 static const rocksdb::Slice bnhtIndexEncode(const rocksdb::Slice &key, int prefix_length, int64_t value) {
   std::string keyStr = key.ToString();
   char valueStr[17];
   sprintf(valueStr, "%016" PRIx64 "", value);
+  valueStr[16] = 0;
 
   //".ht" . chr(255) . prefix(key) . chr(255) . hex(value) . chr(255) . suffix(key)
   std::string buf;
@@ -124,19 +122,19 @@ void BNHTIndexCmd::Do() {
   }
 
   int32_t ret = 0;
-//  if (old_value == -1) { //新值
-//    ret = 1;
-//    const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, value_);
-//    g_pika_server->db()->Setex(htKey1, bnhtIndexValueEmpty, bnhtIndexValueTTL);
-//  } else if (old_value > 0) { //老值
-//    std::vector <std::string> htKeys;
-//    const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, old_value);
-//    htKeys.push_back(htKey1.ToString());
-//    g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kStrings);
-//
-//    const rocksdb::Slice htKey2 = bnhtIndexEncode(key_, prefix_length_, value_);
-//    g_pika_server->db()->Setex(htKey2, bnhtIndexValueEmpty, bnhtIndexValueTTL);
-//  }
+  if (old_value == -1) { //新值
+    ret = 1;
+    const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, value_);
+    g_pika_server->db()->Setex(htKey1, rocksdb::Slice(""), 7 * 86400);
+  } else if (old_value > 0) { //老值
+    std::vector <std::string> htKeys;
+    const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, old_value);
+    htKeys.push_back(htKey1.ToString());
+    g_pika_server->db()->DelByType(htKeys, blackwidow::DataType::kStrings);
+
+    const rocksdb::Slice htKey2 = bnhtIndexEncode(key_, prefix_length_, value_);
+    g_pika_server->db()->Setex(htKey2, rocksdb::Slice(""), 7 * 86400);
+  }
   res_.AppendContent(":" + std::to_string(ret));
 }
 
