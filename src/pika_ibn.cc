@@ -124,7 +124,8 @@ void BNHTIndexCmd::Do() {
   }
 
   int32_t res = 0;
-  g_pika_server->db()->HSet(key_, bnhtIndexValueEmpty, bnhtIndexValueEmpty, &res);
+  const rocksdb::Slice htKey1 = bnhtIndexEncode(key_, prefix_length_, value_);
+  g_pika_server->db()->HSet(htKey1, bnhtIndexValueEmpty, bnhtIndexValueEmpty, &res);
 
   int32_t ret = 0;
 //  if (old_value == -1) { //新值
