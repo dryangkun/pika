@@ -83,7 +83,6 @@ class RedisHashes : public Redis {
   //start ibn
   Status BNHMinOrMax(const Slice& key, const Slice& field, int64_t value,
                      int32_t* ret, bool is_min);
-  Status BNHTIndexGetSet(const Slice& key, const Slice& field, int64_t value, int64_t *res);
   //end ibn
 
   // Keys Commands

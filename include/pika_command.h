@@ -210,7 +210,6 @@ const std::string kCmdNamePUnSubscribe = "punsubscribe";
 //start ibn
 const std::string kCmdNameBNHMin = "bnhmin";
 const std::string kCmdNameBNHMax = "bnhmax";
-const std::string kCmdNameBNHTIndex = "bnhtindex";
 const std::string kCmdNameBNStream = "bnstream";
 const std::string kCmdNameBNMSetex = "bnmsetex";
 //end ibn

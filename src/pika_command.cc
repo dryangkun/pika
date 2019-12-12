@@ -244,9 +244,6 @@ void InitCmdInfoTable() {
   ////BNHMax
   CmdInfo* hmaxptr = new CmdInfo(kCmdNameBNHMax, 4, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHMax, hmaxptr));
-  ////BNHTIndex
-  CmdInfo* htindexptr = new CmdInfo(kCmdNameBNHTIndex, 4, kCmdFlagsWrite | kCmdFlagsHash);
-  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHTIndex, htindexptr));
   ////BNStream
   CmdInfo* streamptr = new CmdInfo(kCmdNameBNStream, -3, kCmdFlagsWrite | kCmdFlagsKv);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNStream, streamptr));
@@ -705,8 +702,6 @@ void InitCmdTable(std::unordered_map<std::string, Cmd*> *cmd_table) {
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHMin, hminptr));
   Cmd* hmaxptr = new BNHMaxCmd();
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHMax, hmaxptr));
-  Cmd* htindexptr = new BNHTIndexCmd();
-  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHTIndex, htindexptr));
   Cmd* streamptr = new BNStreamCmd();
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNStream, streamptr));
   Cmd* msetexptr = new BNMSetexCmd();

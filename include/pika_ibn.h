@@ -35,20 +35,6 @@ private:
     virtual void DoInitial(const PikaCmdArgsType &argvs, const CmdInfo *const ptr_info);
 };
 
-class BNHTIndexCmd : public Cmd {
-public:
-    BNHTIndexCmd() {}
-
-    virtual void Do();
-
-private:
-    std::string key_, field_;
-    int prefix_length_;
-    int64_t value_;
-
-    virtual void DoInitial(const PikaCmdArgsType &argvs, const CmdInfo *const ptr_info);
-};
-
 class BNStreamCmd : public Cmd {
 public:
     BNStreamCmd() {};

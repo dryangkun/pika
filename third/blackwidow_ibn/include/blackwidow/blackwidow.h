@@ -421,7 +421,6 @@ class BlackWidow {
   //start ibn
   Status BNHMinOrMax(const Slice& key, const Slice& field, int64_t value,
                      int32_t* res, bool is_min);
-  Status BNHTIndexGetSet(const Slice& key, const Slice& field, int64_t value, int64_t *res);
   Status BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl);
   //end ibn
 
