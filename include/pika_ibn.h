@@ -31,6 +31,7 @@ public:
 private:
     std::string key_, field_;
     int64_t value_;
+    int64_t range_v;
 
     virtual void DoInitial(const PikaCmdArgsType &argvs, const CmdInfo *const ptr_info);
 };

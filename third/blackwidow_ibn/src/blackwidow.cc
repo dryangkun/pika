@@ -366,8 +366,8 @@ Status BlackWidow::PKHRScanRange(const Slice& key, const Slice& field_start,
 
 //start ibn
 Status BlackWidow::BNHMinOrMax(const Slice& key, const Slice& field,
-                               int64_t value, int32_t* res, bool is_min) {
-  return hashes_db_->BNHMinOrMax(key, field, value, res, is_min);
+                               int64_t value, int32_t* res, bool is_min, int64_t range_v) {
+  return hashes_db_->BNHMinOrMax(key, field, value, res, is_min, range_v);
 }
 
 Status BlackWidow::BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl) {

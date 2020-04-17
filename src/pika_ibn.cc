@@ -29,7 +29,7 @@ void BNHMinCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_
 
 void BNHMinCmd::Do() {
   int32_t ret = 0;
-  rocksdb::Status s = g_pika_server->db()->BNHMinOrMax(key_, field_, value_, &ret, true);
+  rocksdb::Status s = g_pika_server->db()->BNHMinOrMax(key_, field_, value_, &ret, true, 0);
   if (s.ok()) {
     res_.AppendContent(":" + std::to_string(ret));
   } else {
@@ -45,16 +45,23 @@ void BNHMaxCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_
   }
   key_ = argv[1];
   field_ = argv[2];
+  range_v = 0;
   if (!slash::string2l(argv[3].data(), argv[3].size(), &value_)) {
     res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHMax);
     return;
+  }
+  if(argv.size() == 5){
+    if (!slash::string2l(argv[4].data(), argv[4].size(), &range_v)) {
+        res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHMax);
+        return;
+    }
   }
   return;
 }
 
 void BNHMaxCmd::Do() {
   int32_t ret = 0;
-  rocksdb::Status s = g_pika_server->db()->BNHMinOrMax(key_, field_, value_, &ret, false);
+  rocksdb::Status s = g_pika_server->db()->BNHMinOrMax(key_, field_, value_, &ret, false, range_v);
   if (s.ok()) {
     res_.AppendContent(":" + std::to_string(ret));
   } else {
