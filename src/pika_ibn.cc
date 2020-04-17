@@ -50,11 +50,9 @@ void BNHMaxCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_
     res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHMax);
     return;
   }
-  if(argv.size() == 5){
-    if (!slash::string2l(argv[4].data(), argv[4].size(), &range_v)) {
-        res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHMax);
-        return;
-    }
+  if (argv.size() == 5 && !slash::string2l(argv[4].data(), argv[4].size(), &range_v)) {
+    res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHMax);
+    return;
   }
   return;
 }
