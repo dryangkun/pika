@@ -15,7 +15,7 @@ namespace blackwidow {
 
 //start ibn
     Status RedisHashes::BNHMinOrMax(const Slice &key, const Slice &field,
-                                    int64_t value, int32_t *ret, bool is_min, int64_t range_v = 0) {
+                                    int64_t value, int32_t *ret, bool is_min) {
       rocksdb::WriteBatch batch;
       ScopeRecordLock l(lock_mgr_, key);
 
@@ -47,34 +47,18 @@ namespace blackwidow {
             if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
               return Status::Corruption("hash value is not an integer");
             }
-            
 
-            bool need_save = false;
-            int64_t diff = 0;
             if (value == ival) {
               *ret = 1;
-            } else if ((is_min && value < ival && range_v == 0) || (!is_min && value > ival && range_v == 0)) {
-              need_save = true;
+            } else if ((is_min && value < ival) || (!is_min && value > ival)) {
+              char buf[32];
+              Int64ToStr(buf, 32, value);
+              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+
+              statistic++;
               *ret = 1;
-            } else if (range_v > 0){
-              diff = value - ival;
-              if (diff <= 0 || diff > range_v) {
-                  *ret = 1;
-                  need_save = diff > range_v;
-              }
-              if( diff > 0 && diff <= range_v) {
-                  *ret = 0;
-                  need_save = true;
-              }
             } else {
               *ret = 0;
-            }
-            if(need_save){
-                char buf[32];
-                Int64ToStr(buf, 32, value);
-                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-
-                statistic++;
             }
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);

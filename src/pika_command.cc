@@ -242,7 +242,7 @@ void InitCmdInfoTable() {
   CmdInfo* hminptr = new CmdInfo(kCmdNameBNHMin, 4, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHMin, hminptr));
   ////BNHMax
-  CmdInfo* hmaxptr = new CmdInfo(kCmdNameBNHMax, -4, kCmdFlagsWrite | kCmdFlagsHash);
+  CmdInfo* hmaxptr = new CmdInfo(kCmdNameBNHMax, 4, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHMax, hmaxptr));
   ////BNStream
   CmdInfo* streamptr = new CmdInfo(kCmdNameBNStream, -3, kCmdFlagsWrite | kCmdFlagsKv);
