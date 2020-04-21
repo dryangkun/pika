@@ -212,6 +212,7 @@ const std::string kCmdNameBNHMin = "bnhmin";
 const std::string kCmdNameBNHMax = "bnhmax";
 const std::string kCmdNameBNStream = "bnstream";
 const std::string kCmdNameBNMSetex = "bnmsetex";
+const std::string kCmdNameBNHistoryRange = "bnhistoryrange";
 //end ibn
 
 typedef pink::RedisCmdArgsType PikaCmdArgsType;
