@@ -154,19 +154,18 @@ namespace blackwidow {
           std::string data_value;
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
-          if(s.ok() && statistic != 0){
-            // int64_t ival = 0;
-            // if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-            //   return Status::Corruption("hash value is not an integer");
-            // }
+          if(s.ok()){
+            int64_t ival = 0;
+            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+              return Status::Corruption("hash value is not an integer");
+            }
 
-            // if(value < ival){//更新最小值
-            //   statistic++;
-            //   char buf[32];
-            //   Int64ToStr(buf, 32, value);
-            //   batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-            // }
-            statistic++;
+            if(value < ival){//更新最小值
+              statistic++;
+              char buf[32];
+              Int64ToStr(buf, 32, value);
+              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+            }
           } else if (s.IsNotFound()) {
             // 当前值为超出范围时
             if(range_ret == 1){
