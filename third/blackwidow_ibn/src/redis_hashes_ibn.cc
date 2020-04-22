@@ -120,24 +120,24 @@ namespace blackwidow {
         } else {
           bool over_range = false;
           int32_t count = 0;
-          std::string data_max_value;
+          std::string data_value;
           version = parsed_hashes_meta_value.version();
           HashesDataKey hashes_max_key(key, version, history_filed);
           s = db_->Get(default_read_options_, handles_[1],
-                       hashes_max_key.Encode(), &data_max_value);
+                       hashes_max_key.Encode(), &data_value);
           if(s.ok()){
-            int64_t max_val = 0;
-            if (!StrToInt64(data_max_value.data(), data_max_value.size(), &max_val)) {
+            int64_t ival = 0;
+            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
               return Status::Corruption("hash value is not an integer");
             }
 
-            if (value > max_val) {//更新最大值
+            if (value > ival) {//更新最大值
               statistic++;
               char buf[32];
               Int64ToStr(buf, 32, value);
               batch.Put(handles_[1], hashes_max_key.Encode(), buf);
             }
-            if(value - max_val > r_val) { //超出范围
+            if(value - ival > r_val) { //超出范围
               over_range = true;
             }
           } else if (s.IsNotFound()) {
@@ -151,7 +151,6 @@ namespace blackwidow {
           }
 
           HashesDataKey hashes_data_key(key, version, field);
-          std::string data_value;
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
           if(s.ok()){
