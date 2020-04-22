@@ -131,12 +131,12 @@ namespace blackwidow {
               return Status::Corruption("hash value is not an integer");
             }
 
-            if (value > max_val) {//更新最大值
-              statistic++;
-              char buf[32];
-              Int64ToStr(buf, 32, value);
-              batch.Put(handles_[1], hashes_max_key.Encode(), buf);
-            }
+            // if (value > max_val) {//更新最大值
+            //   statistic++;
+            //   char buf[32];
+            //   Int64ToStr(buf, 32, value);
+            //   batch.Put(handles_[1], hashes_max_key.Encode(), buf);
+            // }
             if(value - max_val > r_val) { //超出范围
               over_range = true;
             }
@@ -160,12 +160,12 @@ namespace blackwidow {
               return Status::Corruption("hash value is not an integer");
             }
 
-            if(value < ival){//更新最小值
-              statistic++;
-              char buf[32];
-              Int64ToStr(buf, 32, value);
-              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-            }
+            // if(value < ival){//更新最小值
+            //   statistic++;
+            //   char buf[32];
+            //   Int64ToStr(buf, 32, value);
+            //   batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+            // }
           } else if (s.IsNotFound()) {
             count++;
             char buf[32];
