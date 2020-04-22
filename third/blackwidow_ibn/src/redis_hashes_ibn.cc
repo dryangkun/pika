@@ -174,9 +174,9 @@ namespace blackwidow {
           if(save_min || save_max){
               char buf[32];
               Int64ToStr(buf, 32, value);
-              // if(save_max) {
-              //   batch.Put(handles_[1], hashes_max_key.Encode(), buf);
-              // }
+              if(save_max) {
+                batch.Put(handles_[1], hashes_max_key.Encode(), buf);
+              }
               // if(save_min) {
               //   batch.Put(handles_[1], hashes_data_key.Encode(), buf);
               // } 
