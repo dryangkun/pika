@@ -178,8 +178,10 @@ namespace blackwidow {
           } else {
             return s;
           }
-          parsed_hashes_meta_value.ModifyCount(count);
-          batch.Put(handles_[0], key, meta_value);
+          if(count != 0){
+            parsed_hashes_meta_value.ModifyCount(count);
+            batch.Put(handles_[0], key, meta_value);
+          }
         }
       } else if (s.IsNotFound()) { // 数据的初始化
         char str[4];
