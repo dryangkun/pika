@@ -118,7 +118,7 @@ namespace blackwidow {
           batch.Put(handles_[1], hashes_max_key.Encode(), buf);
           *ret = 1;
         } else {
-          int32_t range_ret = 0;
+          bool over_range = false;
           int32_t count = 0;
           std::string data_max_value;
           version = parsed_hashes_meta_value.version();
@@ -138,10 +138,10 @@ namespace blackwidow {
               batch.Put(handles_[1], hashes_max_key.Encode(), buf);
             }
             if(value - max_val > r_val) { //超出范围
-              range_ret = 1;
+              over_range = true;
             }
           } else if (s.IsNotFound()) {
-              range_ret = 1;
+              over_range = true;
               count++;
               char buf[32];
               Int64ToStr(buf, 32, value);
@@ -167,14 +167,14 @@ namespace blackwidow {
               batch.Put(handles_[1], hashes_data_key.Encode(), buf);
             }
           } else if (s.IsNotFound()) {
-            // 当前值为超出范围时
-            if(range_ret == 1){
-              *ret = 1;
-            }
             count++;
             char buf[32];
             Int64ToStr(buf, 32, value);
             batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+            
+            if(over_range){// 当前值为超出范围时
+              *ret = 1;
+            }
           } else {
             return s;
           }
@@ -183,7 +183,7 @@ namespace blackwidow {
             batch.Put(handles_[0], key, meta_value);
           }
         }
-      } else if (s.IsNotFound()) { // 数据的初始化
+      } else if (s.IsNotFound()) {// 数据的初始化
         char str[4];
         EncodeFixed32(str, 1);
         HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
