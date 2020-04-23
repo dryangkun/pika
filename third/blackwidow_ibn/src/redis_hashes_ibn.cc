@@ -142,8 +142,8 @@ namespace blackwidow {
             }
           } else if (s.IsNotFound()) {
               over_range = true;
-              save_max = true;
-              count++;
+              // save_max = true;
+              // count++;
           } else {
               return s;
           }
@@ -162,8 +162,8 @@ namespace blackwidow {
               save_min = true;
             }
           } else if (s.IsNotFound()) {
-            count++;
-            save_min = true;
+            // count++;
+            // save_min = true;
             
             if(over_range){// 当前值为超出范围时
               *ret = 1;
