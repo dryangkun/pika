@@ -147,7 +147,7 @@ namespace blackwidow {
               return s;
           }
 
-          bool save_min = false;
+          // bool save_min = false;
           // HashesDataKey hashes_data_key(key, version, field);
           // s = db_->Get(default_read_options_, handles_[1],
           //              hashes_data_key.Encode(), &data_value);
@@ -171,15 +171,16 @@ namespace blackwidow {
           // } else {
           //   return s;
           // }
-          if(save_min || save_max){
+          // if(save_min || save_max){
+          if(save_max){
               char buf[32];
               Int64ToStr(buf, 32, value);
               if(save_max) {
                 batch.Put(handles_[1], hashes_max_key.Encode(), buf);
               }
-              if(save_min) {
-                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-              } 
+              // if(save_min) {
+              //   batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+              // } 
           }
           if(count != 0){
             parsed_hashes_meta_value.ModifyCount(count);
