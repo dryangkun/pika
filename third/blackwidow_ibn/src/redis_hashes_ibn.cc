@@ -147,40 +147,39 @@ namespace blackwidow {
               return s;
           }
 
-          // bool save_min = false;
-          // HashesDataKey hashes_data_key(key, version, field);
-          // s = db_->Get(default_read_options_, handles_[1],
-          //              hashes_data_key.Encode(), &data_value);
-          // if(s.ok()){
-          //   int64_t ival = 0;
-          //   if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-          //     return Status::Corruption("hash value is not an integer");
-          //   }
+          bool save_min = false;
+          HashesDataKey hashes_data_key(key, version, field);
+          s = db_->Get(default_read_options_, handles_[1],
+                       hashes_data_key.Encode(), &data_value);
+          if(s.ok()){
+            int64_t ival = 0;
+            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+              return Status::Corruption("hash value is not an integer");
+            }
 
-          //   if(value < ival){//更新最小值
-          //     statistic++;
-          //     save_min = true;
-          //   }
-          // } else if (s.IsNotFound()) {
-          //   count++;
-          //   save_min = true;
+            if(value < ival){//更新最小值
+              statistic++;
+              save_min = true;
+            }
+          } else if (s.IsNotFound()) {
+            count++;
+            save_min = true;
             
-          //   if(over_range){// 当前值为超出范围时
-          //     *ret = 1;
-          //   }
-          // } else {
-          //   return s;
-          // }
-          // if(save_min || save_max){
-          if(save_max){
+            if(over_range){// 当前值为超出范围时
+              *ret = 1;
+            }
+          } else {
+            return s;
+          }
+          if(save_min || save_max){
               char buf[32];
               Int64ToStr(buf, 32, value);
               if(save_max) {
                 batch.Put(handles_[1], hashes_max_key.Encode(), buf);
               }
-              // if(save_min) {
-              //   batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-              // } 
+              if(save_min) {
+                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+              } 
           }
           if(count != 0){
             parsed_hashes_meta_value.ModifyCount(count);
