@@ -159,7 +159,7 @@ namespace blackwidow {
 
             if(value < ival){//更新最小值
               statistic++;
-              save_min = true;
+              // save_min = true;
             }
           } else if (s.IsNotFound()) {
             count++;
