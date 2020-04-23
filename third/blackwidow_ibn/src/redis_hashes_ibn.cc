@@ -127,18 +127,18 @@ namespace blackwidow {
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_max_key.Encode(), &data_value);
           if(s.ok()){
-            int64_t ival = 0;
-            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-              return Status::Corruption("hash value is not an integer");
-            }
+            // int64_t ival = 0;
+            // if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+            //   return Status::Corruption("hash value is not an integer");
+            // }
 
-            if (value > ival) {//更新最大值
-              statistic++;
-              save_max = true;
-            }
-            if(value - ival > r_val) { //超出范围
-              over_range = true;
-            }
+            // if (value > ival) {//更新最大值
+            //   statistic++;
+            //   save_max = true;
+            // }
+            // if(value - ival > r_val) { //超出范围
+            //   over_range = true;
+            // }
           } else if (s.IsNotFound()) {
               over_range = true;
               save_max = true;
