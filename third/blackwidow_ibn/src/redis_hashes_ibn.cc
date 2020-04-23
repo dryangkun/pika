@@ -120,7 +120,6 @@ namespace blackwidow {
         } else {
           bool over_range = false;
           bool save_max = false;
-          bool save_min = false;
           int32_t count = 0;
           std::string data_value;
           version = parsed_hashes_meta_value.version();
@@ -148,6 +147,7 @@ namespace blackwidow {
               return s;
           }
 
+          bool save_min = false;
           HashesDataKey hashes_data_key(key, version, field);
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
