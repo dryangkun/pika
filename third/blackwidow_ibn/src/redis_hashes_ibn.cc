@@ -152,15 +152,15 @@ namespace blackwidow {
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
           if(s.ok()){
-            int64_t ival = 0;
-            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-              return Status::Corruption("hash value is not an integer");
-            }
+            // int64_t ival = 0;
+            // if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+            //   return Status::Corruption("hash value is not an integer");
+            // }
 
-            if(value < ival){//更新最小值
-              statistic++;
-              save_min = true;
-            }
+            // if(value < ival){//更新最小值
+            //   statistic++;
+            //   save_min = true;
+            // }
           } else if (s.IsNotFound()) {
             count++;
             save_min = true;
