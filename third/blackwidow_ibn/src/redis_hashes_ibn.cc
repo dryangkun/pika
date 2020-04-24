@@ -241,6 +241,10 @@ namespace blackwidow {
           char buf[32];
           Int64ToStr(buf, 32, value);
           if(s.ok()){
+              int64_t ival = 0;
+              if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+                return Status::Corruption("hash value is not an integer");
+              }
               statistic++;
               batch.Put(handles_[1], hashes_max_key.Encode(), buf);
           } else if (s.IsNotFound()) {
@@ -256,6 +260,10 @@ namespace blackwidow {
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
           if(s.ok()){
+              int64_t ival = 0;
+              if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+                return Status::Corruption("hash value is not an integer");
+              }
               statistic++;
               batch.Put(handles_[1], hashes_data_key.Encode(), buf);
           } else if (s.IsNotFound()) {
