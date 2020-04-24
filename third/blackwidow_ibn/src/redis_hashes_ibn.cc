@@ -231,7 +231,8 @@ namespace blackwidow {
           batch.Put(handles_[1], hashes_data_key.Encode(), buf);
           *ret = 1;
         } else {
-
+          version = parsed_hashes_meta_value.version();
+          std::string data_value;
           HashesDataKey hashes_data_key(key, version, field);
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
