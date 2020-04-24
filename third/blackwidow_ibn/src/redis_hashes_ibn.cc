@@ -93,7 +93,7 @@ namespace blackwidow {
     }
 
 
-    Status RedisHashes::BNHistoryRange(const Slice &key, std::vector<std::string> &fields,
+    Status RedisHashes::BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
                                     int64_t value, int64_t r_val, int32_t *ret) {
       rocksdb::WriteBatch batch;
       ScopeRecordLock l(lock_mgr_, key);
