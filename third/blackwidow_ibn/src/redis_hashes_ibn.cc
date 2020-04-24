@@ -238,16 +238,14 @@ namespace blackwidow {
           HashesDataKey hashes_max_key(key, version, history_filed);
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_max_key.Encode(), &data_value);
+          char buf[32];
+          Int64ToStr(buf, 32, value);
           if(s.ok()){
-              char buf[32];
-              Int64ToStr(buf, 32, value);
               statistic++;
               batch.Put(handles_[1], hashes_max_key.Encode(), buf);
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);
             batch.Put(handles_[0], key, meta_value);
-            char buf[32];
-            Int64ToStr(buf, 32, value);
             batch.Put(handles_[1], hashes_max_key.Encode(), buf);
             
           } else {
@@ -258,15 +256,11 @@ namespace blackwidow {
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
           if(s.ok()){
-              char buf[32];
-              Int64ToStr(buf, 32, value);
               statistic++;
               batch.Put(handles_[1], hashes_data_key.Encode(), buf);
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);
             batch.Put(handles_[0], key, meta_value);
-            char buf[32];
-            Int64ToStr(buf, 32, value);
             batch.Put(handles_[1], hashes_data_key.Encode(), buf);
             
           } else {
