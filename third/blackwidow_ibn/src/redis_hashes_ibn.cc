@@ -246,8 +246,8 @@ namespace blackwidow {
                 return Status::Corruption("hash value is not an integer");
               }
 
+              statistic++;
               if (value > ival) {//更新最大值
-                statistic++;
                 batch.Put(handles_[1], hashes_max_key.Encode(), buf);
               }
               // batch.Put(handles_[1], hashes_max_key.Encode(), buf);
@@ -269,8 +269,8 @@ namespace blackwidow {
                 return Status::Corruption("hash value is not an integer");
               }
 
+              statistic++;
               if(value < ival){//更新最小值
-                statistic++;
                 batch.Put(handles_[1], hashes_data_key.Encode(), buf);
               }
               // batch.Put(handles_[1], hashes_data_key.Encode(), buf);
