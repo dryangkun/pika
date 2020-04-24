@@ -370,9 +370,9 @@ Status BlackWidow::BNHMinOrMax(const Slice& key, const Slice& field,
   return hashes_db_->BNHMinOrMax(key, field, value, res, is_min);
 }
 
-Status BlackWidow::BNHistoryRange(const Slice &key, const Slice &field, const Slice &history_filed,
+Status BlackWidow::BNHistoryRange(const Slice &key, std::vector<std::string> &fields,
                       int64_t value, int64_t r_val, int32_t *ret) {
-  return hashes_db_->BNHistoryRange(key, field, history_filed, value, r_val, ret);
+  return hashes_db_->BNHistoryRange(key, fields, value, r_val, ret);
 }
 
 Status BlackWidow::BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl) {

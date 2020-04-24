@@ -42,7 +42,8 @@ public:
     virtual void Do();
 
 private:
-    std::string key_, field_, history_filed_;
+    std::string key_;
+    std::vector<std::string> fields;
     int64_t value_,r_val_;
 
     virtual void DoInitial(const PikaCmdArgsType &argvs, const CmdInfo *const ptr_info);
