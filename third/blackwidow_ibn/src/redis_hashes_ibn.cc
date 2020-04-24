@@ -225,14 +225,35 @@ namespace blackwidow {
           parsed_hashes_meta_value.set_count(2);
           batch.Put(handles_[0], key, meta_value);
           HashesDataKey hashes_data_key(key, version, field);
+          HashesDataKey hashes_max_key(key, version, history_filed);
 
           char buf[32];
           Int64ToStr(buf, 32, value);
           batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+          batch.Put(handles_[1], hashes_max_key.Encode(), buf);
           *ret = 1;
         } else {
           version = parsed_hashes_meta_value.version();
           std::string data_value;
+          HashesDataKey hashes_max_key(key, version, history_filed);
+          s = db_->Get(default_read_options_, handles_[1],
+                       hashes_max_key.Encode(), &data_value);
+          if(s.ok()){
+              char buf[32];
+              Int64ToStr(buf, 32, value);
+              statistic++;
+              batch.Put(handles_[1], hashes_max_key.Encode(), buf);
+          } else if (s.IsNotFound()) {
+            parsed_hashes_meta_value.ModifyCount(1);
+            batch.Put(handles_[0], key, meta_value);
+            char buf[32];
+            Int64ToStr(buf, 32, value);
+            batch.Put(handles_[1], hashes_max_key.Encode(), buf);
+            
+          } else {
+            return s;
+          }
+
           HashesDataKey hashes_data_key(key, version, field);
           s = db_->Get(default_read_options_, handles_[1],
                        hashes_data_key.Encode(), &data_value);
@@ -259,10 +280,12 @@ namespace blackwidow {
         version = hashes_meta_value.UpdateVersion();
         batch.Put(handles_[0], key, hashes_meta_value.Encode());
         HashesDataKey hashes_data_key(key, version, field);
+        HashesDataKey hashes_max_key(key, version, history_filed);
 
         char buf[32];
         Int64ToStr(buf, 32, value);
         batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+        batch.Put(handles_[1], hashes_max_key.Encode(), buf);
         *ret = 1;
       } else {
         return s;
