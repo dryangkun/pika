@@ -93,7 +93,7 @@ namespace blackwidow {
     }
 
 
-    Status RedisHashes::BNHistoryRange(const Slice &key, const Slice &field, const Slice &history_filed,
+    Status RedisHashes::BNHistoryRange1(const Slice &key, const Slice &field, const Slice &history_filed,
                                     int64_t value, int64_t r_val, int32_t *ret) {
       rocksdb::WriteBatch batch;
       ScopeRecordLock l(lock_mgr_, key);
@@ -140,9 +140,9 @@ namespace blackwidow {
               over_range = true;
             }
           } else if (s.IsNotFound()) {
-              // over_range = true;
-              // save_max = true;
-              // count++;
+              over_range = true;
+              save_max = true;
+              count++;
           } else {
               return s;
           }
@@ -162,12 +162,12 @@ namespace blackwidow {
               save_min = true;
             }
           } else if (s.IsNotFound()) {
-            // count++;
-            // save_min = true;
+            count++;
+            save_min = true;
             
-            // if(over_range){// 当前值为超出范围时
-            //   *ret = 1;
-            // }
+            if(over_range){// 当前值为超出范围时
+              *ret = 1;
+            }
           } else {
             return s;
           }
@@ -199,6 +199,69 @@ namespace blackwidow {
         Int64ToStr(buf, 32, value);
         batch.Put(handles_[1], hashes_data_key.Encode(), buf);
         batch.Put(handles_[1], hashes_max_key.Encode(), buf);
+        *ret = 1;
+      } else {
+        return s;
+      }
+      s = db_->Write(default_write_options_, &batch);
+      UpdateSpecificKeyStatistics(key.ToString(), statistic);
+      return s;
+    }
+
+    Status RedisHashes::BNHistoryRange(const Slice &key, const Slice &field, const Slice &history_filed,
+                                    int64_t value, int64_t r_val, int32_t *ret) {
+      rocksdb::WriteBatch batch;
+      ScopeRecordLock l(lock_mgr_, key);
+
+      int32_t version = 0;
+      uint32_t statistic = 0;
+      std::string meta_value;
+      Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+      if (s.ok()) {
+        ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
+        if (parsed_hashes_meta_value.IsStale()
+            || parsed_hashes_meta_value.count() == 0) {
+          version = parsed_hashes_meta_value.InitialMetaValue();
+          parsed_hashes_meta_value.set_count(2);
+          batch.Put(handles_[0], key, meta_value);
+          HashesDataKey hashes_data_key(key, version, field);
+
+          char buf[32];
+          Int64ToStr(buf, 32, value);
+          batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+          *ret = 1;
+        } else {
+
+          HashesDataKey hashes_data_key(key, version, field);
+          s = db_->Get(default_read_options_, handles_[1],
+                       hashes_data_key.Encode(), &data_value);
+          if(s.ok()){
+              char buf[32];
+              Int64ToStr(buf, 32, value);
+              statistic++;
+              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+          } else if (s.IsNotFound()) {
+            parsed_hashes_meta_value.ModifyCount(1);
+            batch.Put(handles_[0], key, meta_value);
+            char buf[32];
+            Int64ToStr(buf, 32, value);
+            batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+            
+          } else {
+            return s;
+          }
+        }
+      } else if (s.IsNotFound()) {// 数据的初始化
+        char str[4];
+        EncodeFixed32(str, 1);
+        HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
+        version = hashes_meta_value.UpdateVersion();
+        batch.Put(handles_[0], key, hashes_meta_value.Encode());
+        HashesDataKey hashes_data_key(key, version, field);
+
+        char buf[32];
+        Int64ToStr(buf, 32, value);
+        batch.Put(handles_[1], hashes_data_key.Encode(), buf);
         *ret = 1;
       } else {
         return s;
