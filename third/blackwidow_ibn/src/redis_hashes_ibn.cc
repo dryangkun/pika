@@ -249,8 +249,6 @@ namespace blackwidow {
               statistic++;
               if (value > ival) {//更新最大值
                 batch.Put(handles_[1], hashes_max_key.Encode(), buf);
-              } else {
-                batch.Put(handles_[1], hashes_max_key.Encode(), data_value);
               }
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);
@@ -273,8 +271,6 @@ namespace blackwidow {
               statistic++;
               if(value < ival){//更新最小值
                 batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-              } else {
-                batch.Put(handles_[1], hashes_max_key.Encode(), data_value);
               }
           } else if (s.IsNotFound()) {
             parsed_hashes_meta_value.ModifyCount(1);
