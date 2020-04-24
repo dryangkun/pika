@@ -188,7 +188,7 @@ namespace blackwidow {
         }
       } else if (s.IsNotFound()) {// 数据的初始化
         char str[4];
-        EncodeFixed32(str, 1);
+        EncodeFixed32(str, 2);
         HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
         version = hashes_meta_value.UpdateVersion();
         batch.Put(handles_[0], key, hashes_meta_value.Encode());
