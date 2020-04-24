@@ -135,9 +135,9 @@ namespace blackwidow {
     //         if (value > ival) {//更新最大值
     //           statistic++;
     //           save_max = true;
-    //         }
-    //         if(value - ival > r_val) { //超出范围
-    //           over_range = true;
+    //            if(value - ival > r_val) { //超出范围
+    //              over_range = true;
+    //            }
     //         }
     //       } else if (s.IsNotFound()) {
     //           over_range = true;
