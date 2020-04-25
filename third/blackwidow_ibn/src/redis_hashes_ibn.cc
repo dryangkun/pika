@@ -129,19 +129,18 @@ namespace blackwidow {
             s = db_->Get(default_read_options_, handles_[1],
                     hashes_data_key.Encode(), &data_value);
             if (s.ok()) {
-              int64_t ival = 0;
-              if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-                return Status::Corruption("hash value is not an integer");
-              }
-              if(index == 0 && value > ival){//max逻辑
-                statistic++;
-                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-                if(value - ival > r_val){
-                  over_range = true;
+              if(index == 0){//max逻辑
+                int64_t ival = 0;
+                if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+                  return Status::Corruption("hash value is not an integer");
                 }
-              } else if (index == 1 && value < ival) { //min逻辑
-                statistic++;
-                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+                if(value > ival){
+                  statistic++;
+                  batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+                  if(value - ival > r_val){
+                    over_range = true;
+                  }
+                }
               }
             } else if (s.IsNotFound()) {
               count++;
