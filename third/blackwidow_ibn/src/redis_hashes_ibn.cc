@@ -95,89 +95,89 @@ namespace blackwidow {
 
     Status RedisHashes::BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
                                     int64_t value, int64_t r_val, int32_t *ret) {
-      rocksdb::WriteBatch batch;
-      ScopeRecordLock l(lock_mgr_, key);
+        rocksdb::WriteBatch batch;
+        ScopeRecordLock l(lock_mgr_, key);
 
-      int32_t version = 0;
-      uint32_t statistic = 0;
-      std::string meta_value;
-      
-      char buf[32];
-      Int64ToStr(buf, 32, value);
-      Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
-      if (s.ok()) {
-        ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
-        if (parsed_hashes_meta_value.IsStale()
-            || parsed_hashes_meta_value.count() == 0) {
-          version = parsed_hashes_meta_value.InitialMetaValue();
-          parsed_hashes_meta_value.set_count(fields.size());
-          batch.Put(handles_[0], key, meta_value);
+        int32_t version = 0;
+        uint32_t statistic = 0;
+        std::string meta_value;
 
-          for (const auto& fieldname : fields) {
-            HashesDataKey hashes_data_key(key, version, fieldname);
-            batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-          }
-          *ret = 1;
-        } else {
-          int32_t count = 0;
-          int index = 0;
-          bool over_range = false;
-          std::string data_value;
-          version = parsed_hashes_meta_value.version();
-          for (const auto& fieldname : fields) {
-            HashesDataKey hashes_data_key(key, version, fieldname);
-            s = db_->Get(default_read_options_, handles_[1],
-                    hashes_data_key.Encode(), &data_value);
-            if (s.ok()) {
-              if(index == 0){//max逻辑
-                int64_t ival = 0;
-                if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-                  return Status::Corruption("hash value is not an integer");
+        char buf[32];
+        Int64ToStr(buf, 32, value);
+        Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+        if (s.ok()) {
+            ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
+            if (parsed_hashes_meta_value.IsStale()
+                || parsed_hashes_meta_value.count() == 0) {
+                version = parsed_hashes_meta_value.InitialMetaValue();
+                parsed_hashes_meta_value.set_count(fields.size());
+                batch.Put(handles_[0], key, meta_value);
+
+                for (const auto &fieldname : fields) {
+                    HashesDataKey hashes_data_key(key, version, fieldname);
+                    batch.Put(handles_[1], hashes_data_key.Encode(), buf);
                 }
-                if(value > ival){
-                  statistic++;
-                  batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-                  if(value - ival > r_val){
-                    over_range = true;
-                  }
-                }
-              }
-            } else if (s.IsNotFound()) {
-              count++;
-              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-
-              if(index == 1 && over_range){
                 *ret = 1;
-              }
-              if(index == 0){
-                over_range = true;
-              }
             } else {
-              return s;
-            }
-            index++;
-          }
-          parsed_hashes_meta_value.ModifyCount(count);
-          batch.Put(handles_[0], key, meta_value);
-        }
-      } else if (s.IsNotFound()) {// 数据的初始化
-        char str[4];
-        EncodeFixed32(str, fields.size());
-        HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
-        version = hashes_meta_value.UpdateVersion();
-        batch.Put(handles_[0], key, hashes_meta_value.Encode());
+                int32_t count = 0;
+                int index = 0;
+                bool over_range = false;
+                std::string data_value;
+                version = parsed_hashes_meta_value.version();
+                for (const auto &fieldname : fields) {
+                    HashesDataKey hashes_data_key(key, version, fieldname);
+                    s = db_->Get(default_read_options_, handles_[1],
+                                 hashes_data_key.Encode(), &data_value);
+                    if (s.ok()) {
+                        if (index == 0) {//max逻辑
+                            int64_t ival = 0;
+                            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+                                return Status::Corruption("hash value is not an integer");
+                            }
+                            if (value > ival) {
+                                statistic++;
+                                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+                                if (value - ival > r_val) {
+                                    over_range = true;
+                                }
+                            }
+                        }
+                    } else if (s.IsNotFound()) {
+                        count++;
+                        batch.Put(handles_[1], hashes_data_key.Encode(), buf);
 
-        for (const auto& fieldname : fields) {
-            HashesDataKey hashes_data_key(key, version, fieldname);
-            batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+                        if (index == 1 && over_range) {
+                            *ret = 1;
+                        }
+                        if (index == 0) {
+                            over_range = true;
+                        }
+                    } else {
+                        return s;
+                    }
+                    index++;
+                }
+                parsed_hashes_meta_value.ModifyCount(count);
+                batch.Put(handles_[0], key, meta_value);
+            }
+        } else if (s.IsNotFound()) {// 数据的初始化
+            char str[4];
+            EncodeFixed32(str, fields.size());
+            HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
+            version = hashes_meta_value.UpdateVersion();
+            batch.Put(handles_[0], key, hashes_meta_value.Encode());
+
+            for (const auto &fieldname : fields) {
+                HashesDataKey hashes_data_key(key, version, fieldname);
+                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+            }
+            *ret = 1;
+        } else {
+            return s;
         }
-        *ret = 1;
-      } else {
+        s = db_->Write(default_write_options_, &batch);
+        UpdateSpecificKeyStatistics(key.ToString(), statistic);
         return s;
-      }
-      s = db_->Write(default_write_options_, &batch);
-      UpdateSpecificKeyStatistics(key.ToString(), statistic);
-      return s;
     }
 //end ibn
 
