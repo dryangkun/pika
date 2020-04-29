@@ -113,8 +113,8 @@ namespace blackwidow {
                 parsed_hashes_meta_value.set_count(fields.size());
                 batch.Put(handles_[0], key, meta_value);
 
-                for (const auto &fieldname : fields) {
-                    HashesDataKey hashes_data_key(key, version, fieldname);
+                for (const auto &field_name : fields) {
+                    HashesDataKey hashes_data_key(key, version, field_name);
                     batch.Put(handles_[1], hashes_data_key.Encode(), buf);
                 }
                 *ret = 1;
@@ -124,8 +124,8 @@ namespace blackwidow {
                 bool over_range = false;
                 std::string data_value;
                 version = parsed_hashes_meta_value.version();
-                for (const auto &fieldname : fields) {
-                    HashesDataKey hashes_data_key(key, version, fieldname);
+                for (const auto &field_name : fields) {
+                    HashesDataKey hashes_data_key(key, version, field_name);
                     s = db_->Get(default_read_options_, handles_[1],
                                  hashes_data_key.Encode(), &data_value);
                     if (s.ok()) {
@@ -167,8 +167,8 @@ namespace blackwidow {
             version = hashes_meta_value.UpdateVersion();
             batch.Put(handles_[0], key, hashes_meta_value.Encode());
 
-            for (const auto &fieldname : fields) {
-                HashesDataKey hashes_data_key(key, version, fieldname);
+            for (const auto &field_name : fields) {
+                HashesDataKey hashes_data_key(key, version, field_name);
                 batch.Put(handles_[1], hashes_data_key.Encode(), buf);
             }
             *ret = 1;
