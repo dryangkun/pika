@@ -4,13 +4,11 @@
 
 #include "src/lua_util.h"
 
-extern "C" {
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-}
-
 namespace blackwidow {
+
+LuaUti::LuaUtl() {
+
+}
 
 LuaUtil::~LuaUtil() {
   luaState_mutex_.Lock();
