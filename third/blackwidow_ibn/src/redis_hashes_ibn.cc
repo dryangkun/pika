@@ -71,7 +71,7 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
 
         iter = luaHashes.reads_.find(write.first);
         if (iter != luaHashes.reads_.end()) {
-          s(iter->second.second);
+          s(iter->second.first);
         } else {
           s = db_->Get(default_read_options_, handles_[1], hashes_data_key.Encode(), &data_value);
         }
