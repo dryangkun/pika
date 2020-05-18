@@ -86,6 +86,10 @@ class RedisHashes : public Redis {
 
   Status BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
                       int64_t value, int64_t r_val, int32_t *ret);
+
+  Status BNInternalHGet(const Slice& key, const Slice& field, std::string* value);
+
+  Status BNHEval(const Slice& key, const Slice& field);
   //end ibn
 
   // Keys Commands
