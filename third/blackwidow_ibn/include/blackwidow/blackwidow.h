@@ -55,6 +55,9 @@ class HyperLogLog;
 
 template <typename T1, typename T2>
 class LRUCache;
+//ibn start
+class LuaUtil;
+//ibn end
 
 struct BlackwidowOptions {
   rocksdb::Options options;
@@ -424,6 +427,10 @@ class BlackWidow {
   Status BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
                       int64_t value, int64_t r_val, int32_t *ret);
   Status BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl);
+
+  Status BNHScriptLoad(const Slice& luaKey, const Slice& value, int32_t* res);
+
+  Status BNHEval(const Slice& luaKey, const Slice& key, const std::vector<std::string>& args);
   //end ibn
 
   // Sets Commands
@@ -1136,6 +1143,9 @@ class BlackWidow {
   RedisZSets* zsets_db_;
   RedisLists* lists_db_;
   std::atomic<bool> is_opened_;
+  //ibn start
+  LuaUtil* luaUtil_;
+  //ibn end
 
   LRUCache<int64_t, std::string>* cursors_store_;
 

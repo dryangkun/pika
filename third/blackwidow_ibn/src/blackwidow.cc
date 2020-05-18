@@ -15,6 +15,9 @@
 #include "src/redis_hyperloglog.h"
 #include "src/lru_cache.h"
 #include "src/scope_record_lock.h"
+//ibn start
+#include "src/lua_util.h"
+//ibn end
 
 namespace blackwidow {
 
@@ -31,6 +34,9 @@ BlackWidow::BlackWidow() :
   scan_keynum_exit_(false) {
   cursors_store_ = new LRUCache<int64_t, std::string>();
   cursors_store_->SetCapacity(5000);
+  //ibn start
+  luaUtil_ = new LuaUtil();
+  //ibn end
 
   Status s = StartBGThread();
   if (!s.ok()) {
@@ -63,6 +69,9 @@ BlackWidow::~BlackWidow() {
   delete lists_db_;
   delete zsets_db_;
   delete cursors_store_;
+  //ibn start
+  delete luaUtil_;
+  //ibn end
 }
 
 static std::string AppendSubDirectory(const std::string& db_path,
@@ -377,6 +386,20 @@ Status BlackWidow::BNHistoryRange(const Slice &key, const std::vector<std::strin
 
 Status BlackWidow::BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl) {
   return strings_db_->BNMSetex(kvs, ttl);
+}
+
+Status BlackWidow::BNHScriptLoad(const Slice& luaKey, const Slice& value, int32_t* res) {
+  return luaUtil_->ScriptSet(hashes_db_, DataType::kHashes, luaKey, value, res);
+}
+
+Status BlackWidow::BNHEval(const Slice& luaKey, const Slice& key, const std::vector<std::string>& args) {
+  std::string luaScript;
+  Status s = luaUtil_->ScriptGet(hashes_db_, DataType::kHashes, luaKey, &luaScript);
+  if (!s.ok()) {
+    return s;
+  }
+
+  return s;
 }
 //end ibn
 
