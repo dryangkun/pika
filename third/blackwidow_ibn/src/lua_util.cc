@@ -6,7 +6,7 @@
 
 namespace blackwidow {
 
-LuaUti::LuaUtl() {
+LuaUtil::LuaUtil() {
 
 }
 
