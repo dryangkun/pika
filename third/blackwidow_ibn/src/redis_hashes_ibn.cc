@@ -55,8 +55,8 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
       parsed_hashes_meta_value.set_count(luaHashes.writes_.size());
       batch.Put(handles_[0], key, meta_value);
       for (const auto& write : luaHashes.writes_) {
-        HashesDataKey hashes_data_key(key, version, write->first);
-        batch.Put(handles_[1], hashes_data_key.Encode(), write->second);
+        HashesDataKey hashes_data_key(key, version, write.first);
+        batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
       }
     } else {
       //执行lua
@@ -67,7 +67,7 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
 
       std::map<std::string, LuaUtilPair>::iterator iter;
       for (const auto& write : luaHashes.writes_) {
-        HashesDataKey hashes_data_key(key, version, write->first);
+        HashesDataKey hashes_data_key(key, version, write.first);
 
         iter = luaHashes.reads_.find(write->first);
         if (iter != luaHashes.reads_.end()) {
@@ -78,10 +78,10 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
 
         if (s.ok()) {
           statistic++;
-          batch.Put(handles_[1], hashes_data_key.Encode(), write->second);
+          batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
         } else if (s.IsNotFound()) {
           count++;
-          batch.Put(handles_[1], hashes_data_key.Encode(), write->second);
+          batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
         } else {
           return s;
         }
@@ -99,8 +99,8 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
     version = hashes_meta_value.UpdateVersion();
     batch.Put(handles_[0], key, hashes_meta_value.Encode());
     for (const auto& write : luaHashes.writes_) {
-      HashesDataKey hashes_data_key(key, version, write->first);
-      batch.Put(handles_[1], hashes_data_key.Encode(), write->second);
+      HashesDataKey hashes_data_key(key, version, write.first);
+      batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
     }
   } else {
     return s;
