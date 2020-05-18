@@ -3,16 +3,16 @@
 //
 
 #include "src/lua_util.h"
+#include "src/lua_util_hashes.h"
 
 namespace blackwidow {
 
 LuaUtil::LuaUtil() {
-
 }
 
 LuaUtil::~LuaUtil() {
   luaState_mutex_.Lock();
-  std::map<std::thread::id, lua_State *>::iterator iter;
+  std::unordered_map<std::thread::id, lua_State *>::iterator iter;
   for (iter = luaState_map_.begin(); iter != luaState_map_.end(); iter++) {
     if (iter->second) {
       lua_close(iter->second);
@@ -61,7 +61,7 @@ rocksdb::Status LuaUtil::ScriptGet(RedisHashes *hashes_db_, DataType type, const
   }
 
   std::string fieldStr = key + luaKey.ToString();
-  std::map<std::string, std::string>::iterator iter;
+  std::unordered_map<std::string, std::string>::iterator iter;
   iter = luaScript_map_.find(fieldStr);
   if (iter != luaScript_map_.end()) {
     *value = iter->second;
@@ -85,7 +85,7 @@ rocksdb::Status LuaUtil::ScriptGet(RedisHashes *hashes_db_, DataType type, const
 }
 
 lua_State * LuaUtil::StateOpen() {
-  std::map<std::thread::id, lua_State *>::iterator iter;
+  std::unordered_map<std::thread::id, lua_State *>::iterator iter;
 
   std::thread::id tid = std::this_thread::get_id();
   iter = luaState_map_.find(tid);
@@ -102,6 +102,8 @@ lua_State * LuaUtil::StateOpen() {
 
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
+  LuaUtilHashes::LuaRegister(L);
+
   luaState_map_[tid] = L;
   luaState_mutex_.Unlock();
   return L;

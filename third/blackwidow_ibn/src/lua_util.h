@@ -7,7 +7,7 @@
 
 #include <string>
 #include <thread>
-#include <map>
+#include <unordered_map>
 
 extern "C" {
 #include <lua.h>
@@ -24,6 +24,9 @@ extern "C" {
 
 namespace blackwidow {
 
+typedef std::pair<rocksdb::Status, std::string> LuaUtilPair;
+const std::string LuaUtilObjStr = "LuaUtilObj";
+
 class LuaUtil {
 public:
   LuaUtil();
@@ -38,9 +41,9 @@ public:
   lua_State* StateOpen();
 
 private:
-  std::map<std::thread::id, lua_State *> luaState_map_;
+  std::unordered_map<std::thread::id, lua_State *> luaState_map_;
   slash::Mutex luaState_mutex_;
-  std::map <std::string, std::string> luaScript_map_;
+  std::unordered_map <std::string, std::string> luaScript_map_;
   slash::Mutex luaScript_mutex_;
 };
 
