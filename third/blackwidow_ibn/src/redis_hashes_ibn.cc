@@ -20,6 +20,7 @@ namespace blackwidow {
 //start ibn
 Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
                                    std::string* value) {
+  int32_t version = 0;
   std::string meta_value;
   Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
   if (s.ok()) {
@@ -29,7 +30,7 @@ Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
     } else {
       version = parsed_hashes_meta_value.version();
       HashesDataKey data_key(key, version, field);
-      s = db_->Get(read_options, handles_[1], data_key.Encode(), value);
+      s = db_->Get(default_read_options_, handles_[1], data_key.Encode(), value);
     }
   }
   return s;
@@ -47,13 +48,13 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
   if (s.ok()) {
     ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
     if (parsed_hashes_meta_value.IsStale() || parsed_hashes_meta_value.count() == 0) {
-      luaHashes->not_found_ = true;
+      luaHashes.not_found_ = true;
       //执行lua
 
       version = parsed_hashes_meta_value.InitialMetaValue();
-      parsed_hashes_meta_value.set_count(luaHashes->writes_.size());
+      parsed_hashes_meta_value.set_count(luaHashes.writes_.size());
       batch.Put(handles_[0], key, meta_value);
-      for (const auto& write : luaHashes->writes_) {
+      for (const auto& write : luaHashes.writes_) {
         HashesDataKey hashes_data_key(key, version, write->first);
         batch.Put(handles_[1], hashes_data_key.Encode(), write->second);
       }
@@ -65,11 +66,11 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
       version = parsed_hashes_meta_value.version();
 
       std::map<std::string, LuaUtilPair>::iterator iter;
-      for (const auto& write : luaHashes->writes_) {
+      for (const auto& write : luaHashes.writes_) {
         HashesDataKey hashes_data_key(key, version, write->first);
 
-        iter = luaHashes->reads_.find(write->first);
-        if (iter != luaHashes->reads_.end()) {
+        iter = luaHashes.reads_.find(write->first);
+        if (iter != luaHashes.reads_.end()) {
           s = iter->second.second;
         } else {
           s = db_->Get(default_read_options_, handles_[1], hashes_data_key.Encode(), &data_value);
@@ -89,15 +90,15 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
       batch.Put(handles_[0], key, meta_value);
     }
   } else if (s.IsNotFound()) {
-    luaHashes->not_found_ = true;
+    luaHashes.not_found_ = true;
     //执行lua
 
     char str[4];
-    EncodeFixed32(str, luaHashes->writes_.size());
+    EncodeFixed32(str, luaHashes.writes_.size());
     HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
     version = hashes_meta_value.UpdateVersion();
     batch.Put(handles_[0], key, hashes_meta_value.Encode());
-    for (const auto& write : luaHashes->writes_) {
+    for (const auto& write : luaHashes.writes_) {
       HashesDataKey hashes_data_key(key, version, write->first);
       batch.Put(handles_[1], hashes_data_key.Encode(), write->second);
     }
