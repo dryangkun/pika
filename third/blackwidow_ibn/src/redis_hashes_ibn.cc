@@ -8,6 +8,12 @@
 
 #include <inttypes.h>
 
+extern "C" {
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+}
+
 #include "blackwidow/util.h"
 #include "src/base_filter.h"
 #include "src/scope_record_lock.h"
@@ -36,7 +42,10 @@ Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
   return s;
 }
 
-Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
+Status RedisHashes::BNHEval(lua_State* L, std::string luaScript,
+                            const Slice& key,
+                            const std::vector<std::string>& args,
+                            std::vector<std::string>* ret) {
   rocksdb::WriteBatch batch;
   ScopeRecordLock l(lock_mgr_, key);
   LuaUtilHashes luaHashes(this, key);
@@ -50,6 +59,10 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
     if (parsed_hashes_meta_value.IsStale() || parsed_hashes_meta_value.count() == 0) {
       luaHashes.not_found_ = true;
       //执行lua
+      s = LuaUtil::StateExecute(L, luaScript, &luaHashes, args, ret);
+      if (!s.ok()) {
+        return s;
+      }
 
       version = parsed_hashes_meta_value.InitialMetaValue();
       parsed_hashes_meta_value.set_count(luaHashes.writes_.size());
@@ -60,6 +73,10 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
       }
     } else {
       //执行lua
+      s = LuaUtil::StateExecute(L, luaScript, &luaHashes, args, ret);
+      if (!s.ok()) {
+        return s;
+      }
 
       int32_t count = 0;
       std::string data_value;
@@ -92,6 +109,10 @@ Status RedisHashes::BNHEval(const Slice& key, const Slice& field) {
   } else if (s.IsNotFound()) {
     luaHashes.not_found_ = true;
     //执行lua
+    s = LuaUtil::StateExecute(L, luaScript, &luaHashes, args, ret);
+    if (!s.ok()) {
+      return s;
+    }
 
     char str[4];
     EncodeFixed32(str, luaHashes.writes_.size());

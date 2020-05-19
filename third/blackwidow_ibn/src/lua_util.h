@@ -8,6 +8,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 extern "C" {
 #include <lua.h>
@@ -39,6 +40,10 @@ public:
   rocksdb::Status ScriptGet(RedisHashes *hashes_db_, DataType type, const rocksdb::Slice &luaKey, std::string *value);
 
   lua_State* StateOpen();
+
+  static rocksdb::Status StateExecute(lua_State* L, std::string luaScript, void *obj,
+                                      const std::vector<std::string>& args,
+                                      std::vector<std::string>* ret);
 
 private:
   std::unordered_map<std::thread::id, lua_State *> luaState_map_;
