@@ -26,7 +26,6 @@ extern "C" {
 namespace blackwidow {
 
 typedef std::pair<rocksdb::Status, std::string> LuaUtilPair;
-const char* LuaUtilObjStr = "LuaUtilObj";
 
 std::string LuaUtilToString(lua_State* L, int index);
 
@@ -43,6 +42,7 @@ public:
 
   lua_State* StateOpen();
 
+  static char* LuaUtilObjStr;
   static rocksdb::Status StateExecute(lua_State* L, std::string luaScript, void *obj,
                                       const std::vector<std::string>& args,
                                       std::vector<std::string>* ret);

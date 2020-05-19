@@ -40,11 +40,6 @@ const std::string SETS_DB = "sets";
 
 const uint32_t COMPACT_THRESHOLD_COUNT = 2000;
 
-//ibn start
-typedef std::pair<rocksdb::Status, std::string> LuaUtilPair;
-const char* LuaUtilObjStr = "LuaUtilObj";
-//ibn end
-
 using Options = rocksdb::Options;
 using BlockBasedTableOptions = rocksdb::BlockBasedTableOptions;
 using Status = rocksdb::Status;
