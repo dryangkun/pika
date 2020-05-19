@@ -3,7 +3,7 @@
 //
 
 #include "src/lua_util.h"
-#include "src/lua_util_hashes.h"
+//#include "src/lua_util_hashes.h"
 
 namespace blackwidow {
 
@@ -108,7 +108,7 @@ lua_State * LuaUtil::StateOpen() {
 
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
-  LuaUtilHashes::LuaRegister(L);
+//  LuaUtilHashes::LuaRegister(L);
 
   luaState_map_[tid] = L;
   luaState_mutex_.Unlock();
