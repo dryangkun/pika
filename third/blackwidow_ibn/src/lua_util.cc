@@ -7,6 +7,12 @@
 
 namespace blackwidow {
 
+std::string LuaUtilToString(lua_State* L, int index) {
+  size_t str_len = 0;
+  const char* str = lua_tolstring(L, -1, &str_len);
+  return std::string(str, str_len);
+}
+
 LuaUtil::LuaUtil() {
 }
 
@@ -140,9 +146,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
     lua_msg = "lua script return nil";
     if (num >= 2 && lua_isstring(L, -2)) {
       lua_msg.append(" - ");
-      size_t err_len = 0;
-      const char* err = lua_tolstring(L, -2, &err_len);
-      lua_msg.append(err, err_len);
+      lua_msg.append(LuaUtilToString(L, -2));
     }
     s = rocksdb::Status::InvalidArgument(lua_msg);
     goto end;
@@ -151,9 +155,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   s = rocksdb::Status::OK();
   if (lua_isstring(L, -1)) {
     //返回string
-    size_t str_len = 0;
-    const char* str = lua_tolstring(L, -1, &str_len);
-    ret->push_back(std::string(str, str_len));
+    ret->push_back(LuaUtilToString(L, -1));
   } else if (lua_isnumber(L, -1)) {
     //返回number
     ret->push_back(std::to_string(lua_tonumber(L, -1)));
@@ -164,9 +166,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
       if (lua_isnumber(L, -1)) {
         ret->push_back(std::to_string(lua_tonumber(L, -1)));
       } else if (lua_isstring(L, -1)) {
-        size_t str_len = 0;
-        const char* str = lua_tolstring(L, -1, &str_len);
-        ret->push_back(std::string(str, str_len));
+        ret->push_back(LuaUtilToString(L, -1));
       }
       lua_pop(L, 1);
     }
