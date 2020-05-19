@@ -26,7 +26,7 @@ extern "C" {
 namespace blackwidow {
 
 typedef std::pair<rocksdb::Status, std::string> LuaUtilPair;
-const std::string LuaUtilObjStr = "LuaUtilObj";
+const char* LuaUtilObjStr = "LuaUtilObj";
 
 std::string LuaUtilToString(lua_State* L, int index);
 
