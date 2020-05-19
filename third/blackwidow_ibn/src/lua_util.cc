@@ -128,9 +128,16 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   lua_pushlightuserdata(L, obj);
   lua_setglobal(L, LuaUtilObjStr);
 
+  //设置全局变量ARGS
+  int arg_num = 0;
+  lua_newtable(L);
   for (const auto& arg : args) {
+    lua_pushinteger(++arg_num);
     lua_pushlstring(L, arg.c_str(), arg.length());
+    lua_settable(L, -3);
   }
+  lua_setglobal(L, "ARGS");
+
   lua_error = luaL_dostring(L, luaScript.c_str());
   if (lua_error) {
     lua_msg = "luaL_dostring fail - " + std::to_string(lua_error);
@@ -178,6 +185,8 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   lua_settop(L, 0);
   lua_pushnil(L);
   lua_setglobal(L, LuaUtilObjStr);
+  lua_pushnil(L);
+  lua_setglobal(L, "ARGS");
   return s;
 }
 

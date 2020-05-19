@@ -254,10 +254,10 @@ void InitCmdInfoTable() {
   CmdInfo* bnhistoryrangeptr = new CmdInfo(kCmdNameBNHistoryRange, 6, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHistoryRange, bnhistoryrangeptr));
   ////BNHScriptLoad
-  CmdInfo* bnhscriptloadpter = new CmdInfo(kCmdNameBNHScriptLoad, 2, kCmdFlagsWrite | kCmdFlagsHash);
+  CmdInfo* bnhscriptloadpter = new CmdInfo(kCmdNameBNHScriptLoad, 3, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHScriptLoad, bnhscriptloadpter));
   ////BNHEval
-  CmdInfo* bnhevalpter = new CmdInfo(kCmdNameBNHEval, 2, kCmdFlagsWrite | kCmdFlagsHash);
+  CmdInfo* bnhevalpter = new CmdInfo(kCmdNameBNHEval, -3, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHEval, bnhevalpter));
   //end ibn
 
