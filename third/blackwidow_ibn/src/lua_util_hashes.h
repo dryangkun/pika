@@ -15,7 +15,6 @@ extern "C" {
 }
 
 #include "rocksdb/status.h"
-#include "rocksdb/slice.h"
 
 #include "src/lua_util.h"
 
@@ -24,13 +23,13 @@ namespace blackwidow {
 class LuaUtilHashes {
 public:
   RedisHashes *hashes_db_;
-  Slice& key_;
+  std::string key_;
 
   bool not_found_;
   std::map<std::string, LuaUtilPair> reads_;
   std::map<std::string, std::string> writes_;
 
-  LuaUtilHashes(RedisHashes *hashes_db_, const Slice& key);
+  LuaUtilHashes(RedisHashes *hashes_db_, const std::string key_);
 
   rocksdb::Status Get(std::string field, std::string* value);
 

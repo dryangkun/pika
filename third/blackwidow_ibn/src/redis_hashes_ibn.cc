@@ -37,7 +37,7 @@ Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
 }
 
 Status RedisHashes::BNHEval(lua_State* L, std::string luaScript,
-                            const Slice& key,
+                            const std::string key,
                             const std::vector<std::string>& args,
                             std::vector<std::string>* ret) {
   rocksdb::WriteBatch batch;

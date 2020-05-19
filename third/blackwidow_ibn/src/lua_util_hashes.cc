@@ -65,7 +65,7 @@ static int LuaUtilHashesSet(lua_State *L) {
   return 0;
 }
 
-LuaUtilHashes::LuaUtilHashes(RedisHashes *hashes_db_, const Slice &key) {
+LuaUtilHashes::LuaUtilHashes(RedisHashes *hashes_db_, const std::string key_) {
   this->hashes_db_ = hashes_db_;
   this->key_ = key;
   not_found_ = false;
@@ -77,7 +77,7 @@ rocksdb::Status LuaUtilHashes::Get(std::string field, std::string *value) {
   }
 
   std::map<std::string, LuaUtilPair>::iterator iter = reads_.find(field);
-  if (iter != reads.end()) {
+  if (iter != reads_.end()) {
     return iter->second.first;
   }
 
