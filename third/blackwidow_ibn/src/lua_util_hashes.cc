@@ -18,7 +18,7 @@ static int LuaUtilHashesGet(lua_State *L) {
     return 2;
   }
 
-  const char *field = lua_tostring(L, 1);
+  std::string field = LuaUtilToString(L, -1);
   if (!luaHashes) {
     lua_pushnil(L);
     lua_pushstring(L, "global variable LuaUtilObj not found");
@@ -26,7 +26,7 @@ static int LuaUtilHashesGet(lua_State *L) {
   }
 
   std::string value;
-  rocksdb::Status s = luaHashes->Get(string(field), &value);
+  rocksdb::Status s = luaHashes->Get(field, &value);
   if (s.ok()) {
     lua_pushlstring(L, value.c_str, value.length());
     return 1;
@@ -53,8 +53,8 @@ static int LuaUtilHashesSet(lua_State *L) {
     return 2;
   }
 
-  const char *field = lua_tostring(L, 1);
-  const char *value = lua_tostring(L, 2);
+  std::string field = LuaUtilToString(L, -2);
+  std::string value = LuaUtilToString(L, -1);
   if (!luaHashes) {
     lua_pushnil(L);
     lua_pushstring(L, "global variable LuaUtilObj not found");
