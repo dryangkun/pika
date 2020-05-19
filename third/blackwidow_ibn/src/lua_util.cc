@@ -165,16 +165,11 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   if (lua_isstring(L, -1)) {
     //返回string
     ret->push_back(LuaUtilToString(L, -1));
-  } else if (lua_isnumber(L, -1)) {
-    //返回number
-    ret->push_back(std::to_string(lua_tonumber(L, -1)));
   } else if (lua_istable(L, -1)) {
     //返回table
     lua_pushnil(L);
     while (lua_next(L, -2)) {
-      if (lua_isnumber(L, -1)) {
-        ret->push_back(std::to_string(lua_tonumber(L, -1)));
-      } else if (lua_isstring(L, -1)) {
+      if (lua_isstring(L, -1)) {
         ret->push_back(LuaUtilToString(L, -1));
       }
       lua_pop(L, 1);
