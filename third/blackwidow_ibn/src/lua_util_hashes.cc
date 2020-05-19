@@ -67,7 +67,7 @@ static int LuaUtilHashesSet(lua_State *L) {
 
 LuaUtilHashes::LuaUtilHashes(RedisHashes *hashes_db_, const std::string key_) {
   this->hashes_db_ = hashes_db_;
-  this->key_ = key;
+  this->key_ = key_;
   not_found_ = false;
 }
 
