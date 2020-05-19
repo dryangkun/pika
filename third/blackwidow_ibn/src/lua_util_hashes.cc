@@ -6,6 +6,8 @@
 
 namespace blackwidow {
 
+extern const char* LuaUtilObjStr;
+
 static int LuaUtilHashesGet(lua_State *L) {
   lua_getglobal(L, LuaUtilObjStr);
   LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_touserdata(L, -1);
