@@ -216,7 +216,7 @@ void BNHScriptLoadCmd::Do() {
   }
 };
 
-void BNHEval::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
+void BNHEvalCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
   if (!ptr_info->CheckArg(argv.size())) {
     res_.SetRes(CmdRes::kWrongNum, kCmdNameBNHScriptLoad);
     return;
@@ -230,7 +230,7 @@ void BNHEval::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_in
   return;
 }
 
-void BNHEval::Do() {
+void BNHEvalCmd::Do() {
   std::vector<std::string> values;
   blackwidow::Status s = g_pika_server->db()->BNHEval(luaKey_, key_, args_, &values);
   if (s.ok()) {
