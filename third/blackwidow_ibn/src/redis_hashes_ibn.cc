@@ -37,12 +37,13 @@ Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
 }
 
 Status RedisHashes::BNHEval(lua_State* L, std::string luaScript,
-                            const std::string key,
+                            const Slice& key,
                             const std::vector<std::string>& args,
                             std::vector<std::string>* ret) {
   rocksdb::WriteBatch batch;
   ScopeRecordLock l(lock_mgr_, key);
-  LuaUtilHashes luaHashes(this, key);
+  std::string keyStr = key.ToString();
+  LuaUtilHashes luaHashes(this, keyStr);
 
   int32_t version = 0;
   uint32_t statistic = 0;
@@ -122,7 +123,7 @@ Status RedisHashes::BNHEval(lua_State* L, std::string luaScript,
   }
 
   s = db_->Write(default_write_options_, &batch);
-  UpdateSpecificKeyStatistics(key.ToString(), statistic);
+  UpdateSpecificKeyStatistics(keyStr, statistic);
   return s;
 }
 
