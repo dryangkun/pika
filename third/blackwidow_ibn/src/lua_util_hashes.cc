@@ -7,15 +7,18 @@
 namespace blackwidow {
 
 static int LuaUtilHashesGet(lua_State *L) {
-  LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_getglobal(L, LuaUtilObjStr);
-  int n = lua_gettop(L);
-  const char *field = lua_tostring(L, 1);
+  lua_getglobal(L, LuaUtilObjStr);
+  LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_touserdata(L, -1);
+  lua_setglobal(L, LuaUtilObjStr);
 
+  int n = lua_gettop(L);
   if (n != 1) {
     lua_pushnil(L);
     lua_pushstring(L, "parameter number != 1");
     return 2;
   }
+
+  const char *field = lua_tostring(L, 1);
   if (!luaHashes) {
     lua_pushnil(L);
     lua_pushstring(L, "global variable LuaUtilObj not found");
@@ -39,16 +42,19 @@ static int LuaUtilHashesGet(lua_State *L) {
 }
 
 static int LuaUtilHashesSet(lua_State *L) {
-  LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_getglobal(L, LuaUtilObjStr);
-  int n = lua_gettop(L);
-  const char *field = lua_tostring(L, 1);
-  const char *value = lua_tostring(L, 2);
+  lua_getglobal(L, LuaUtilObjStr);
+  LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_touserdata(L, -1);
+  lua_setglobal(L, LuaUtilObjStr);
 
+  int n = lua_gettop(L);
   if (n != 2) {
     lua_pushnil(L);
     lua_pushstring(L, "parameter number != 2");
     return 2;
   }
+
+  const char *field = lua_tostring(L, 1);
+  const char *value = lua_tostring(L, 2);
   if (!luaHashes) {
     lua_pushnil(L);
     lua_pushstring(L, "global variable LuaUtilObj not found");
