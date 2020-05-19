@@ -140,8 +140,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
     lua_msg = "lua script return nil";
     if (num >= 2 && lua_isstring(L, -2)) {
       lua_msg.append(" - ");
-
-      int err_len = 0;
+      size_t err_len = 0;
       const char* err = lua_tolstring(L, -2, &err_len);
       lua_msg.append(err, err_len);
     }
@@ -152,7 +151,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   s = rocksdb::Status::OK();
   if (lua_isstring(L, -1)) {
     //返回string
-    int str_len = 0;
+    size_t str_len = 0;
     const char* str = lua_tolstring(L, -1, &str_len);
     ret->push_back(std::string(str, str_len));
   } else if (lua_isnumber(L, -1)) {
@@ -162,7 +161,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
     //返回table
     lua_pushnil(L);
 
-    int str_len = 0;
+    size_t str_len = 0;
     char* str;
     while (lua_next(L, -2)) {
       if (lua_isnumber(L, -1)) {
