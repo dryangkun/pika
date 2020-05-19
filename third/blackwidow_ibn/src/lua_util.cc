@@ -132,7 +132,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   int arg_num = 0;
   lua_newtable(L);
   for (const auto& arg : args) {
-    lua_pushinteger(++arg_num);
+    lua_pushinteger(L, ++arg_num);
     lua_pushlstring(L, arg.c_str(), arg.length());
     lua_settable(L, -3);
   }
