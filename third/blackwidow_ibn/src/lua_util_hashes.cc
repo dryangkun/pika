@@ -28,7 +28,7 @@ static int LuaUtilHashesGet(lua_State *L) {
   std::string value;
   rocksdb::Status s = luaHashes->Get(field, &value);
   if (s.ok()) {
-    lua_pushlstring(L, value.c_str, value.length());
+    lua_pushlstring(L, value.c_str(), value.length());
     return 1;
   } else if (s.IsNotFound()) {
     lua_pushboolean(L, 0);
