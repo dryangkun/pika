@@ -61,7 +61,7 @@ static int LuaUtilHashesSet(lua_State *L) {
     return 2;
   }
 
-  luaHashes->Set(string(field), string(value));
+  luaHashes->Set(field, value);
   return 0;
 }
 
