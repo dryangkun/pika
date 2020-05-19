@@ -9,7 +9,7 @@ namespace blackwidow {
 
 std::string LuaUtilToString(lua_State* L, int index) {
   size_t str_len = 0;
-  const char* str = lua_tolstring(L, -1, &str_len);
+  const char* str = lua_tolstring(L, index, &str_len);
   return std::string(str, str_len);
 }
 
