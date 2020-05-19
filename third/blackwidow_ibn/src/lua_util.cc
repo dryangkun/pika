@@ -35,7 +35,7 @@ LuaUtil::~LuaUtil() {
 }
 
 rocksdb::Status LuaUtil::ScriptSet(RedisHashes *hashes_db_, DataType type, const rocksdb::Slice &luaKey,
-                                   const rocksdb::Slice &value, int32_t* res) {
+                                   const rocksdb::Slice &luaScript, int32_t* res) {
   std::string key = "luascript_save_";
   switch (type) {
     case DataType::kHashes:
@@ -46,14 +46,14 @@ rocksdb::Status LuaUtil::ScriptSet(RedisHashes *hashes_db_, DataType type, const
   }
 
   luaScript_mutex_.Lock();
-  rocksdb::Status s = hashes_db_->HSet(key, luaKey, value, res);
+  rocksdb::Status s = hashes_db_->HSet(key, luaKey, luaScript, res);
   if (!s.ok()) {
     luaScript_mutex_.Unlock();
     return s;
   }
 
   key.append(luaKey.ToString());
-  luaScript_map_[key] = value.ToString();
+  luaScript_map_[key] = luaScript.ToString();
   luaScript_mutex_.Unlock();
   return rocksdb::Status::OK();
 }

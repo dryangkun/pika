@@ -428,7 +428,7 @@ class BlackWidow {
                       int64_t value, int64_t r_val, int32_t *ret);
   Status BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl);
 
-  Status BNHScriptLoad(const Slice& luaKey, const Slice& value, int32_t* res);
+  Status BNHScriptLoad(const Slice& luaKey, const Slice& luaScript, int32_t* res);
 
   Status BNHEval(const Slice& luaKey, const Slice& key,
                  const std::vector<std::string>& args,

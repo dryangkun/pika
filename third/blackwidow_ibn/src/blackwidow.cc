@@ -388,8 +388,8 @@ Status BlackWidow::BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl) {
   return strings_db_->BNMSetex(kvs, ttl);
 }
 
-Status BlackWidow::BNHScriptLoad(const Slice& luaKey, const Slice& value, int32_t* res) {
-  return luaUtil_->ScriptSet(hashes_db_, DataType::kHashes, luaKey, value, res);
+Status BlackWidow::BNHScriptLoad(const Slice& luaKey, const Slice& luaScript, int32_t* res) {
+  return luaUtil_->ScriptSet(hashes_db_, DataType::kHashes, luaKey, luaScript, res);
 }
 
 Status BlackWidow::BNHEval(const Slice& luaKey, const Slice& key,
