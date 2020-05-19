@@ -8,18 +8,10 @@
 
 #include <inttypes.h>
 
-extern "C" {
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-}
-
 #include "blackwidow/util.h"
 #include "src/base_filter.h"
 #include "src/scope_record_lock.h"
 #include "src/scope_snapshot.h"
-#include "src/lua_util.h"
-#include "src/lua_util_hashes.h"
 
 namespace blackwidow {
 

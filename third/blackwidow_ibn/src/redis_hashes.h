@@ -11,6 +11,8 @@
 #include <unordered_set>
 
 #include "src/redis.h"
+#include "src/lua_util.h"
+#include "src/lua_util_hashes.h"
 
 namespace blackwidow {
 
