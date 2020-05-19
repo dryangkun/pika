@@ -392,14 +392,16 @@ Status BlackWidow::BNHScriptLoad(const Slice& luaKey, const Slice& value, int32_
   return luaUtil_->ScriptSet(hashes_db_, DataType::kHashes, luaKey, value, res);
 }
 
-Status BlackWidow::BNHEval(const Slice& luaKey, const Slice& key, const std::vector<std::string>& args) {
+Status BlackWidow::BNHEval(const Slice& luaKey, const Slice& key,
+                           const std::vector<std::string>& args,
+                           std::vector<std::string>* ret) {
   std::string luaScript;
   Status s = luaUtil_->ScriptGet(hashes_db_, DataType::kHashes, luaKey, &luaScript);
   if (!s.ok()) {
     return s;
   }
-
-  return s;
+  lua_State* L = luaUtil_->StateOpen();
+  return hashes_db_->BNHEval(L, luaScript, key, args, ret);
 }
 //end ibn
 

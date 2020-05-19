@@ -430,7 +430,9 @@ class BlackWidow {
 
   Status BNHScriptLoad(const Slice& luaKey, const Slice& value, int32_t* res);
 
-  Status BNHEval(const Slice& luaKey, const Slice& key, const std::vector<std::string>& args);
+  Status BNHEval(const Slice& luaKey, const Slice& key,
+                 const std::vector<std::string>& args,
+                 std::vector<std::string>* ret);
   //end ibn
 
   // Sets Commands
