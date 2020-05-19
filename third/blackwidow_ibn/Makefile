@@ -146,8 +146,8 @@ $(LIBRARY): $(LIBOBJECTS)
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(LIBOBJECTS)
 
 clean:
-	make -C ./examples clean
-	make -C ./tests clean
+# 	make -C ./examples clean
+# 	make -C ./tests clean
 	rm -f $(LIBRARY)
 	rm -rf $(CLEAN_FILES)
 	rm -rf $(LIBOUTPUT)
