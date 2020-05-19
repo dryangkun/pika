@@ -206,7 +206,7 @@ void BNHScriptLoadCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *con
   return;
 }
 
-void BNHScriptLoadCmd:Do() {
+void BNHScriptLoadCmd::Do() {
   int32_t ret = 0;
   blackwidow::Status s = g_pika_server->db()->BNHScriptLoad(luaKey_, luaScript_, &ret);
   if (s.ok()) {
