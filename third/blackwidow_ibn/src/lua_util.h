@@ -42,7 +42,7 @@ public:
 
   lua_State* StateOpen();
 
-  static char* LuaUtilObjStr;
+  static const char* LuaUtilObjStr;
 
   static rocksdb::Status StateExecute(lua_State* L, std::string luaScript, void *obj,
                                       const std::vector<std::string>& args,

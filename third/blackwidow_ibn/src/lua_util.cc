@@ -13,7 +13,7 @@ std::string LuaUtilToString(lua_State* L, int index) {
   return std::string(str, str_len);
 }
 
-char* LuaUtil::LuaUtilObjStr("_LuaUtilObj_");
+const char* LuaUtil::LuaUtilObjStr("_LuaUtilObj_");
 
 LuaUtil::LuaUtil() {
 }
