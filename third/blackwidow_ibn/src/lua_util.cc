@@ -118,7 +118,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   int num = 0;
 
   lua_pushlightuserdata(L, obj);
-  lua_setglobal(L, LuaUtilObjStr);
+  lua_setglobal(L, LuaUtilObjStr.c_str());
 
   for (const auto& arg : args) {
     lua_pushlstring(L, arg.c_str(), arg.length());
@@ -178,7 +178,7 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
   end:
   lua_settop(L, 0);
   lua_pushnil(L);
-  lua_setglobal(L, LuaUtilObjStr);
+  lua_setglobal(L, LuaUtilObjStr.c_str());
   return s;
 }
 
