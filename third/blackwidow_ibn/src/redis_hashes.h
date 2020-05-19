@@ -10,9 +10,13 @@
 #include <vector>
 #include <unordered_set>
 
+extern "C" {
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+}
+
 #include "src/redis.h"
-#include "src/lua_util.h"
-#include "src/lua_util_hashes.h"
 
 namespace blackwidow {
 
