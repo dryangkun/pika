@@ -78,6 +78,7 @@ rocksdb::Status LuaUtilHashes::Get(std::string field, std::string *value) {
 
   std::map<std::string, LuaUtilPair>::iterator iter = reads_.find(field);
   if (iter != reads_.end()) {
+    *value = iter->second.second;
     return iter->second.first;
   }
 
