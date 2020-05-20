@@ -35,16 +35,19 @@ public:
 
   ~LuaUtil();
 
-  rocksdb::Status ScriptSet(RedisHashes *hashes_db_, DataType type, const rocksdb::Slice &luaKey,
-                            const Slice &luaScript, int32_t* res);
+  rocksdb::Status ScriptSet(RedisHashes *hashes_db_, const DataType& type,
+                            const rocksdb::Slice& luaKey,
+                            const Slice& luaScript, int32_t* res);
 
-  rocksdb::Status ScriptGet(RedisHashes *hashes_db_, DataType type, const rocksdb::Slice &luaKey, std::string *value);
+  rocksdb::Status ScriptGet(RedisHashes *hashes_db_, const DataType& type,
+                            const rocksdb::Slice& luaKey,
+                            std::string *value);
 
   lua_State* StateOpen();
 
   static const char* LuaUtilObjStr;
 
-  static rocksdb::Status StateExecute(lua_State* L, std::string luaScript, void *obj,
+  static rocksdb::Status StateExecute(lua_State* L, const std::string& luaScript, void* obj,
                                       const std::vector<std::string>& args,
                                       std::vector<std::string>* ret);
 

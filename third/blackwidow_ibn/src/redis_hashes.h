@@ -95,7 +95,7 @@ class RedisHashes : public Redis {
 
   Status BNInternalHGet(const Slice& key, const Slice& field, std::string* value);
 
-  Status BNHEval(lua_State* L, std::string luaScript,
+  Status BNHEval(lua_State* L, const std::string& luaScript,
                  const Slice& key,
                  const std::vector<std::string>& args,
                  std::vector<std::string>* ret);

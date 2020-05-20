@@ -9,7 +9,7 @@ namespace blackwidow {
 static int LuaUtilHashesGet(lua_State *L) {
   lua_getglobal(L, LuaUtil::LuaUtilObjStr);
   LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_touserdata(L, -1);
-  lua_setglobal(L, LuaUtil::LuaUtilObjStr);
+  lua_pop(L, 1);
 
   int n = lua_gettop(L);
   if (n != 1) {
@@ -44,7 +44,7 @@ static int LuaUtilHashesGet(lua_State *L) {
 static int LuaUtilHashesSet(lua_State *L) {
   lua_getglobal(L, LuaUtil::LuaUtilObjStr);
   LuaUtilHashes* luaHashes = (LuaUtilHashes *)lua_touserdata(L, -1);
-  lua_setglobal(L, LuaUtil::LuaUtilObjStr);
+  lua_pop(L, 1);
 
   int n = lua_gettop(L);
   if (n != 2) {

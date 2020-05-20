@@ -36,7 +36,7 @@ Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
   return s;
 }
 
-Status RedisHashes::BNHEval(lua_State* L, std::string luaScript,
+Status RedisHashes::BNHEval(lua_State* L, const std::string& luaScript,
                             const Slice& key,
                             const std::vector<std::string>& args,
                             std::vector<std::string>* ret) {

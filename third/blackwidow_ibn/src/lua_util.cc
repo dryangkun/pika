@@ -34,8 +34,9 @@ LuaUtil::~LuaUtil() {
   luaScript_mutex_.Unlock();
 }
 
-rocksdb::Status LuaUtil::ScriptSet(RedisHashes *hashes_db_, DataType type, const rocksdb::Slice &luaKey,
-                                   const rocksdb::Slice &luaScript, int32_t* res) {
+rocksdb::Status LuaUtil::ScriptSet(RedisHashes *hashes_db_, const DataType& type,
+                                   const rocksdb::Slice& luaKey,
+                                   const rocksdb::Slice& luaScript, int32_t* res) {
   std::string key = "luascript_save_";
   switch (type) {
     case DataType::kHashes:
@@ -58,7 +59,9 @@ rocksdb::Status LuaUtil::ScriptSet(RedisHashes *hashes_db_, DataType type, const
   return rocksdb::Status::OK();
 }
 
-rocksdb::Status LuaUtil::ScriptGet(RedisHashes *hashes_db_, DataType type, const rocksdb::Slice &luaKey, std::string* value) {
+rocksdb::Status LuaUtil::ScriptGet(RedisHashes *hashes_db_, const DataType& type,
+                                   const rocksdb::Slice& luaKey,
+                                   std::string* value) {
   std::string key = "luascript_save_";
   switch (type) {
     case DataType::kHashes:
@@ -117,7 +120,7 @@ lua_State * LuaUtil::StateOpen() {
   return L;
 }
 
-rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void *obj,
+rocksdb::Status LuaUtil::StateExecute(lua_State* L, const std::string& luaScript, void* obj,
                                       const std::vector<std::string>& args,
                                       std::vector<std::string>* ret) {
   int lua_error = 0;
@@ -170,7 +173,11 @@ rocksdb::Status LuaUtil::StateExecute(lua_State* L, std::string luaScript, void 
     lua_pushnil(L);
     while (lua_next(L, -2)) {
       if (lua_isstring(L, -1)) {
-        ret->push_back(LuaUtilToString(L, -2));
+        if (lua_isnumber(L, -2)) {
+          ret->push_back(std::to_string(lua_tointeger(L, -2)));
+        } else {
+          ret->push_back(LuaUtilToString(L, -2));
+        }
         ret->push_back(LuaUtilToString(L, -1));
       }
       lua_pop(L, 1);
