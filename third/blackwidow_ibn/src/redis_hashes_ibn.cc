@@ -1,84 +1,180 @@
 #include "src/redis_hashes.h"
 
 #include <memory>
+
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
+
 #include <inttypes.h>
 
 #include "blackwidow/util.h"
 #include "src/base_filter.h"
 #include "src/scope_record_lock.h"
 #include "src/scope_snapshot.h"
+#include "src/lua_util.h"
+#include "src/lua_util_hashes.h"
 
 namespace blackwidow {
 
 //start ibn
-    Status RedisHashes::BNHMinOrMax(const Slice &key, const Slice &field,
-                                    int64_t value, int32_t *ret, bool is_min) {
-      rocksdb::WriteBatch batch;
-      ScopeRecordLock l(lock_mgr_, key);
+Status RedisHashes::BNInternalHGet(const Slice& key, const Slice& field,
+                                   std::string* value) {
+  int32_t version = 0;
+  std::string meta_value;
+  Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+  if (s.ok()) {
+    ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
+    if (parsed_hashes_meta_value.IsStale() || parsed_hashes_meta_value.count() == 0) {
+      return Status::NotFound();
+    } else {
+      version = parsed_hashes_meta_value.version();
+      HashesDataKey data_key(key, version, field);
+      s = db_->Get(default_read_options_, handles_[1], data_key.Encode(), value);
+    }
+  }
+  return s;
+}
 
-      int32_t version = 0;
-      uint32_t statistic = 0;
-      std::string meta_value;
-      Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+Status RedisHashes::BNHEval(lua_State* L, const std::string& luaScript,
+                            const Slice& key,
+                            const std::vector<std::string>& args,
+                            std::vector<std::string>* ret) {
+  rocksdb::WriteBatch batch;
+  ScopeRecordLock l(lock_mgr_, key);
+  std::string keyStr = key.ToString();
+  LuaUtilHashes luaHashes(this, keyStr);
+
+  int32_t version = 0;
+  uint32_t statistic = 0;
+  std::string meta_value;
+  Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+  if (s.ok()) {
+    ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
+    if (parsed_hashes_meta_value.IsStale() || parsed_hashes_meta_value.count() == 0) {
+      luaHashes.not_found_ = true;
+      //执行lua
+      s = LuaUtil::StateExecute(L, luaScript, &luaHashes, args, ret);
+      if (!s.ok()) {
+        return s;
+      }
+
+      version = parsed_hashes_meta_value.InitialMetaValue();
+      parsed_hashes_meta_value.set_count(luaHashes.writes_.size());
+      batch.Put(handles_[0], key, meta_value);
+      for (const auto& write : luaHashes.writes_) {
+        HashesDataKey hashes_data_key(key, version, write.first);
+        batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
+      }
+    } else {
+      //执行lua
+      s = LuaUtil::StateExecute(L, luaScript, &luaHashes, args, ret);
+      if (!s.ok()) {
+        return s;
+      }
+
+      int32_t count = 0;
+      std::string data_value;
+      version = parsed_hashes_meta_value.version();
+
+      std::map<std::string, LuaUtilPair>::iterator iter;
+      for (const auto& write : luaHashes.writes_) {
+        HashesDataKey hashes_data_key(key, version, write.first);
+
+        iter = luaHashes.reads_.find(write.first);
+        if (iter != luaHashes.reads_.end()) {
+          s = iter->second.first;
+        } else {
+          s = db_->Get(default_read_options_, handles_[1], hashes_data_key.Encode(), &data_value);
+        }
+
+        if (s.ok()) {
+          statistic++;
+          batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
+        } else if (s.IsNotFound()) {
+          count++;
+          batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
+        } else {
+          return s;
+        }
+      }
+      parsed_hashes_meta_value.ModifyCount(count);
+      batch.Put(handles_[0], key, meta_value);
+    }
+  } else if (s.IsNotFound()) {
+    luaHashes.not_found_ = true;
+    //执行lua
+    s = LuaUtil::StateExecute(L, luaScript, &luaHashes, args, ret);
+    if (!s.ok()) {
+      return s;
+    }
+
+    char str[4];
+    EncodeFixed32(str, luaHashes.writes_.size());
+    HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
+    version = hashes_meta_value.UpdateVersion();
+    batch.Put(handles_[0], key, hashes_meta_value.Encode());
+    for (const auto& write : luaHashes.writes_) {
+      HashesDataKey hashes_data_key(key, version, write.first);
+      batch.Put(handles_[1], hashes_data_key.Encode(), write.second);
+    }
+  } else {
+    return s;
+  }
+
+  s = db_->Write(default_write_options_, &batch);
+  UpdateSpecificKeyStatistics(keyStr, statistic);
+  return s;
+}
+
+Status RedisHashes::BNHMinOrMax(const Slice &key, const Slice &field,
+                                int64_t value, int32_t *ret, bool is_min) {
+  rocksdb::WriteBatch batch;
+  ScopeRecordLock l(lock_mgr_, key);
+
+  int32_t version = 0;
+  uint32_t statistic = 0;
+  std::string meta_value;
+  Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+  if (s.ok()) {
+    ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
+    if (parsed_hashes_meta_value.IsStale() || parsed_hashes_meta_value.count() == 0) {
+      version = parsed_hashes_meta_value.InitialMetaValue();
+      parsed_hashes_meta_value.set_count(1);
+      batch.Put(handles_[0], key, meta_value);
+      HashesDataKey hashes_data_key(key, version, field);
+
+      char buf[32];
+      Int64ToStr(buf, 32, value);
+      batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+      *ret = 1;
+    } else {
+      version = parsed_hashes_meta_value.version();
+      HashesDataKey hashes_data_key(key, version, field);
+      std::string data_value;
+      s = db_->Get(default_read_options_, handles_[1],
+                   hashes_data_key.Encode(), &data_value);
       if (s.ok()) {
-        ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
-        if (parsed_hashes_meta_value.IsStale()
-            || parsed_hashes_meta_value.count() == 0) {
-          version = parsed_hashes_meta_value.InitialMetaValue();
-          parsed_hashes_meta_value.set_count(1);
-          batch.Put(handles_[0], key, meta_value);
-          HashesDataKey hashes_data_key(key, version, field);
+        int64_t ival = 0;
+        if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+          return Status::Corruption("hash value is not an integer");
+        }
 
+        if (value == ival) {
+          *ret = 1;
+        } else if ((is_min && value < ival) || (!is_min && value > ival)) {
           char buf[32];
           Int64ToStr(buf, 32, value);
           batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+
+          statistic++;
           *ret = 1;
         } else {
-          version = parsed_hashes_meta_value.version();
-          HashesDataKey hashes_data_key(key, version, field);
-          std::string data_value;
-          s = db_->Get(default_read_options_, handles_[1],
-                       hashes_data_key.Encode(), &data_value);
-          if (s.ok()) {
-            int64_t ival = 0;
-            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-              return Status::Corruption("hash value is not an integer");
-            }
-
-            if (value == ival) {
-              *ret = 1;
-            } else if ((is_min && value < ival) || (!is_min && value > ival)) {
-              char buf[32];
-              Int64ToStr(buf, 32, value);
-              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-
-              statistic++;
-              *ret = 1;
-            } else {
-              *ret = 0;
-            }
-          } else if (s.IsNotFound()) {
-            parsed_hashes_meta_value.ModifyCount(1);
-            batch.Put(handles_[0], key, meta_value);
-
-            char buf[32];
-            Int64ToStr(buf, 32, value);
-            batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-            *ret = 1;
-          } else {
-            return s;
-          }
+          *ret = 0;
         }
       } else if (s.IsNotFound()) {
-        char str[4];
-        EncodeFixed32(str, 1);
-        HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
-        version = hashes_meta_value.UpdateVersion();
-        batch.Put(handles_[0], key, hashes_meta_value.Encode());
-        HashesDataKey hashes_data_key(key, version, field);
+        parsed_hashes_meta_value.ModifyCount(1);
+        batch.Put(handles_[0], key, meta_value);
 
         char buf[32];
         Int64ToStr(buf, 32, value);
@@ -87,98 +183,114 @@ namespace blackwidow {
       } else {
         return s;
       }
-      s = db_->Write(default_write_options_, &batch);
-      UpdateSpecificKeyStatistics(key.ToString(), statistic);
-      return s;
     }
+  } else if (s.IsNotFound()) {
+    char str[4];
+    EncodeFixed32(str, 1);
+    HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
+    version = hashes_meta_value.UpdateVersion();
+    batch.Put(handles_[0], key, hashes_meta_value.Encode());
+    HashesDataKey hashes_data_key(key, version, field);
+
+    char buf[32];
+    Int64ToStr(buf, 32, value);
+    batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+    *ret = 1;
+  } else {
+    return s;
+  }
+  s = db_->Write(default_write_options_, &batch);
+  UpdateSpecificKeyStatistics(key.ToString(), statistic);
+  return s;
+}
 
 
-    Status RedisHashes::BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
-                                    int64_t value, int64_t r_val, int32_t *ret) {
-        rocksdb::WriteBatch batch;
-        ScopeRecordLock l(lock_mgr_, key);
+Status RedisHashes::BNHistoryRange(const Slice &key, const std::vector <std::string> &fields,
+                                   int64_t value, int64_t r_val, int32_t *ret) {
+  rocksdb::WriteBatch batch;
+  ScopeRecordLock l(lock_mgr_, key);
 
-        int32_t version = 0;
-        uint32_t statistic = 0;
-        std::string meta_value;
+  int32_t version = 0;
+  uint32_t statistic = 0;
+  std::string meta_value;
 
-        char buf[32];
-        Int64ToStr(buf, 32, value);
-        Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+  char buf[32];
+  Int64ToStr(buf, 32, value);
+  Status s = db_->Get(default_read_options_, handles_[0], key, &meta_value);
+  if (s.ok()) {
+    ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
+    if (parsed_hashes_meta_value.IsStale()
+        || parsed_hashes_meta_value.count() == 0) {
+      version = parsed_hashes_meta_value.InitialMetaValue();
+      parsed_hashes_meta_value.set_count(fields.size());
+      batch.Put(handles_[0], key, meta_value);
+
+      for (const auto &field_name : fields) {
+        HashesDataKey hashes_data_key(key, version, field_name);
+        batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+      }
+      *ret = 1;
+    } else {
+      int32_t count = 0;
+      int index = 0;
+      bool over_range = false;
+      std::string data_value;
+      version = parsed_hashes_meta_value.version();
+      for (const auto &field_name : fields) {
+        HashesDataKey hashes_data_key(key, version, field_name);
+        s = db_->Get(default_read_options_, handles_[1],
+                     hashes_data_key.Encode(), &data_value);
         if (s.ok()) {
-            ParsedHashesMetaValue parsed_hashes_meta_value(&meta_value);
-            if (parsed_hashes_meta_value.IsStale()
-                || parsed_hashes_meta_value.count() == 0) {
-                version = parsed_hashes_meta_value.InitialMetaValue();
-                parsed_hashes_meta_value.set_count(fields.size());
-                batch.Put(handles_[0], key, meta_value);
-
-                for (const auto &field_name : fields) {
-                    HashesDataKey hashes_data_key(key, version, field_name);
-                    batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-                }
-                *ret = 1;
-            } else {
-                int32_t count = 0;
-                int index = 0;
-                bool over_range = false;
-                std::string data_value;
-                version = parsed_hashes_meta_value.version();
-                for (const auto &field_name : fields) {
-                    HashesDataKey hashes_data_key(key, version, field_name);
-                    s = db_->Get(default_read_options_, handles_[1],
-                                 hashes_data_key.Encode(), &data_value);
-                    if (s.ok()) {
-                        if (index == 0) {//max逻辑
-                            int64_t ival = 0;
-                            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
-                                return Status::Corruption("hash value is not an integer");
-                            }
-                            if (value > ival) {
-                                statistic++;
-                                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-                                if (value - ival > r_val) {
-                                    over_range = true;
-                                }
-                            }
-                        }
-                    } else if (s.IsNotFound()) {
-                        count++;
-                        batch.Put(handles_[1], hashes_data_key.Encode(), buf);
-
-                        if (index == 1 && over_range) {
-                            *ret = 1;
-                        }
-                        if (index == 0) {
-                            over_range = true;
-                        }
-                    } else {
-                        return s;
-                    }
-                    index++;
-                }
-                parsed_hashes_meta_value.ModifyCount(count);
-                batch.Put(handles_[0], key, meta_value);
+          if (index == 0) {//max逻辑
+            int64_t ival = 0;
+            if (!StrToInt64(data_value.data(), data_value.size(), &ival)) {
+              return Status::Corruption("hash value is not an integer");
             }
-        } else if (s.IsNotFound()) {// 数据的初始化
-            char str[4];
-            EncodeFixed32(str, fields.size());
-            HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
-            version = hashes_meta_value.UpdateVersion();
-            batch.Put(handles_[0], key, hashes_meta_value.Encode());
-
-            for (const auto &field_name : fields) {
-                HashesDataKey hashes_data_key(key, version, field_name);
-                batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+            if (value > ival) {
+              statistic++;
+              batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+              if (value - ival > r_val) {
+                over_range = true;
+              }
             }
+          }
+        } else if (s.IsNotFound()) {
+          count++;
+          batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+
+          if (index == 1 && over_range) {
             *ret = 1;
+          }
+          if (index == 0) {
+            over_range = true;
+          }
         } else {
-            return s;
+          return s;
         }
-        s = db_->Write(default_write_options_, &batch);
-        UpdateSpecificKeyStatistics(key.ToString(), statistic);
-        return s;
+        index++;
+      }
+      parsed_hashes_meta_value.ModifyCount(count);
+      batch.Put(handles_[0], key, meta_value);
     }
+  } else if (s.IsNotFound()) {// 数据的初始化
+    char str[4];
+    EncodeFixed32(str, fields.size());
+    HashesMetaValue hashes_meta_value(std::string(str, sizeof(int32_t)));
+    version = hashes_meta_value.UpdateVersion();
+    batch.Put(handles_[0], key, hashes_meta_value.Encode());
+
+    for (const auto &field_name : fields) {
+      HashesDataKey hashes_data_key(key, version, field_name);
+      batch.Put(handles_[1], hashes_data_key.Encode(), buf);
+    }
+    *ret = 1;
+  } else {
+    return s;
+  }
+  s = db_->Write(default_write_options_, &batch);
+  UpdateSpecificKeyStatistics(key.ToString(), statistic);
+  return s;
+}
 //end ibn
 
 }  //  namespace blackwidow

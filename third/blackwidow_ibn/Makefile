@@ -1,6 +1,6 @@
 CLEAN_FILES = # deliberately empty, so we can append below.
 CXX=g++
-LDFLAGS= -lpthread -lrt
+LDFLAGS= -lpthread -lrt -L/usr/local/lib -lluajit-5.1
 CXXFLAGS= -g -std=c++11 -fno-builtin-memcmp -msse -msse4.2 -pipe -fPIC
 PROFILING_FLAGS=-pg
 ARFLAGS = rs
@@ -91,7 +91,7 @@ ifndef DISABLE_WARNING_AS_ERROR
   WARNING_FLAGS += -Werror
 endif
 
-CXXFLAGS += $(WARNING_FLAGS) -I. -I./include -I$(ROCKSDB_INCLUDE_DIR) -I$(ROCKSDB_PATH) -I$(SLASH_INCLUDE_DIR) $(OPT)
+CXXFLAGS += $(WARNING_FLAGS) -I. -I./include -I/usr/local/include/luajit-2.1 -I$(ROCKSDB_INCLUDE_DIR) -I$(ROCKSDB_PATH) -I$(SLASH_INCLUDE_DIR) $(OPT)
 
 date := $(shell date +%F)
 git_sha := $(shell git rev-parse HEAD 2>/dev/null)
@@ -146,8 +146,8 @@ $(LIBRARY): $(LIBOBJECTS)
 	$(AM_V_at)$(AR) $(ARFLAGS) $@ $(LIBOBJECTS)
 
 clean:
-	make -C ./examples clean
-	make -C ./tests clean
+# 	make -C ./examples clean
+# 	make -C ./tests clean
 	rm -f $(LIBRARY)
 	rm -rf $(CLEAN_FILES)
 	rm -rf $(LIBOUTPUT)

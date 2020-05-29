@@ -1,6 +1,7 @@
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
+
 #include <inttypes.h>
 #include <atomic>
 
@@ -122,9 +123,13 @@ void BNStreamCmd::Do() {
   slash::ReadLock l(g_pika_server->BNStreamRWLock());
 
   char id_bytes[17];
-  sprintf(id_bytes, "%08" PRIx32 "%08" PRIx32 "",
-          (uint32_t) std::stoi(g_pika_conf->server_id()),
-          g_pika_server->BNStreamOffset());
+  sprintf(id_bytes, "%08"
+  PRIx32
+  "%08"
+  PRIx32
+  "",
+    (uint32_t) std::stoi(g_pika_conf->server_id()),
+    g_pika_server->BNStreamOffset());
   prefix.append(id_bytes);
 
   PikaCmdArgsType *bnmsetex_argv = new PikaCmdArgsType();
@@ -138,7 +143,9 @@ void BNStreamCmd::Do() {
     std::string key;
     key.append(prefix);
     char counter_buf[17];
-    sprintf(counter_buf, "%016" PRIx64 "", g_pika_server->BNStreamCounter());
+    sprintf(counter_buf, "%016"
+    PRIx64
+    "", g_pika_server->BNStreamCounter());
     key.append(counter_buf);
 
     bnmsetex_kvs.push_back({key, value});
@@ -159,7 +166,7 @@ void BNStreamCmd::Do() {
   return;
 }
 
-void BNMSetexCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo* const ptr_info) {
+void BNMSetexCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
   if (!ptr_info->CheckArg(argv.size())) {
     res_.SetRes(CmdRes::kWrongNum, kCmdNameBNMSetex);
     return;
@@ -184,6 +191,55 @@ void BNMSetexCmd::Do() {
   blackwidow::Status s = g_pika_server->db()->BNMSetex(kvs_, sec_);
   if (s.ok()) {
     res_.SetRes(CmdRes::kOk);
+  } else {
+    res_.SetRes(CmdRes::kErrOther, s.ToString());
+  }
+}
+
+void BNHScriptLoadCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
+  if (!ptr_info->CheckArg(argv.size())) {
+    res_.SetRes(CmdRes::kWrongNum, kCmdNameBNHScriptLoad);
+    return;
+  }
+  luaKey_ = argv[1];
+  luaScript_ = argv[2];
+  return;
+}
+
+void BNHScriptLoadCmd::Do() {
+  int32_t ret = 0;
+  blackwidow::Status s = g_pika_server->db()->BNHScriptLoad(luaKey_, luaScript_, &ret);
+  if (s.ok()) {
+    res_.AppendContent(":" + std::to_string(ret));
+  } else {
+    res_.SetRes(CmdRes::kErrOther, s.ToString());
+  }
+};
+
+void BNHEvalCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
+  if (!ptr_info->CheckArg(argv.size())) {
+    res_.SetRes(CmdRes::kWrongNum, kCmdNameBNHScriptLoad);
+    return;
+  }
+  luaKey_ = argv[1];
+  key_ = argv[2];
+  size_t pos = 3;
+  while (pos < argv.size()) {
+    args_.push_back(argv[pos++]);
+  }
+  return;
+}
+
+void BNHEvalCmd::Do() {
+  std::vector<std::string> values;
+  blackwidow::Status s = g_pika_server->db()->BNHEval(luaKey_, key_, args_, &values);
+  if (s.ok()) {
+    res_.AppendArrayLen(values.size());
+    for (const auto& value : values) {
+      res_.AppendString(value);
+    }
+  } else if (s.IsNotFound()) {
+    res_.AppendArrayLen(0);
   } else {
     res_.SetRes(CmdRes::kErrOther, s.ToString());
   }
