@@ -9,12 +9,12 @@ bnhmax来说，原有值如果小于新值，则写入新值，并且返回0，�
 ```
 
 * bnmsetex(key1, val1, key2, val2..., ttl)
-```$xslt
+```
 相比较于mset，就是多了可以设置ttl
 ```
 
 * bnstream(key, val1, val2...)
-```$xslt
+```
 类似kafka方式，允许消息可以重复消费，举例说明：
 
 bnstream("a", "1", "2", "3")，则最终生成的kv数据如下：
@@ -27,19 +27,19 @@ offset保证是递增（字典序）
 ```
 
 * bnhscriptload scriptname scriptcontent
-```$xslt
+```
 存储lua脚本内容
 bnhscriptload test_script 'pika_hset("z", 123) return nil, "wrong xxx"'
 ```
 
 * bnheval scriptname hashkey args
-```$xslt
+```
 调用lua脚本操作hash
 bnheval test_script k 1 2 3 4
 ```
 
 * 例：bnhistoryrange的lua实现
-```$xslt
+```
 bnhscriptload bnhistoryrange "
 local old_id = ARGS[1]
 local history_field = ARGS[2]
@@ -71,6 +71,6 @@ end
 return code"
 ```
 * 使用
-```$xslt
+```
 bnheval bnhistoryrange u_1 y history 1 15
 ```
