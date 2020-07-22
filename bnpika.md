@@ -1,5 +1,5 @@
 ### 新增命令说明
-* bnhmin/bnhmax(key, field, int)
+##### bnhmin/bnhmax(key, field, int)
 ```
 作用类似hset，
 
@@ -8,12 +8,12 @@ bnhmin来说，原有值如果大于新值，则写入新值，并且返回0，�
 bnhmax来说，原有值如果小于新值，则写入新值，并且返回0，否则返回1
 ```
 
-* bnmsetex(key1, val1, key2, val2..., ttl)
+##### bnmsetex(key1, val1, key2, val2..., ttl)
 ```
 相比较于mset，就是多了可以设置ttl
 ```
 
-* bnstream(key, val1, val2...)
+##### bnstream(key, val1, val2...)
 ```
 类似kafka方式，允许消息可以重复消费，举例说明：
 
@@ -26,19 +26,19 @@ key . chr(255) . offset
 offset保证是递增（字典序）
 ```
 
-* bnhscriptload scriptname scriptcontent
+##### bnhscriptload scriptname scriptcontent
 ```
 存储lua脚本内容
 bnhscriptload test_script 'pika_hset("z", 123) return nil, "wrong xxx"'
 ```
 
-* bnheval scriptname hashkey args
+##### bnheval scriptname hashkey args
 ```
 调用lua脚本操作hash
 bnheval test_script k 1 2 3 4
 ```
 
-* 例：bnhistoryrange的lua实现
+##### 例：bnhistoryrange的lua实现
 ```
 bnhscriptload bnhistoryrange "
 local old_id = ARGS[1]
@@ -70,7 +70,7 @@ if (not oival) then
 end
 return code"
 ```
-* 使用
+###### 使用
 ```
 bnheval bnhistoryrange u_1 y history 1 15
 ```
