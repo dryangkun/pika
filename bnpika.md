@@ -31,7 +31,7 @@ offset保证是递增（字典序）
 ```
 存储lua脚本内容
 bnhscriptload test_script 'local x1 = ARGS[1]; pika_hset("z", tostring(x1)); local x = pika_hget("z"); pika_hset("z1", tostring(x)); return nil, "wrong xxx"'
-注意一：整个lua脚本的执行期间会对hash结构进行上排他锁，命令执行完成后解锁
+注意一：整个lua脚本的执行期间会对hash结构上排他锁，命令执行完成后解锁
 注意二：pika_hset可以设置hash的field对应的值，调用pika_hget可以获取hash的field对应的值，输入的数据从ARGS数组读取
 注意三：pika_hset的执行是批量的，因此对某个filed先执行pika_hset，在pika_hget，会发现值并不是刚pika_hset的值，而是执行命令前的值-因为数据写入是在命令执行的最后
 ```
