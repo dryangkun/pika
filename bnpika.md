@@ -26,7 +26,7 @@ key . chr(255) . offset
 offset保证是递增（字典序）
 ```
 
-##### bnhscriptload scriptname scriptcontent
+##### hash结构的lua支持
 ##### 依赖与luajit-5.1，需先安装luajit-5.1
 ###### bnhscriptload scriptname scriptcontent
 ```
