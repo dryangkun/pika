@@ -31,7 +31,7 @@ offset保证是递增（字典序）
 ```
 存储lua脚本内容
 bnhscriptload test_script 'pika_hset("z", 1234); local x = pika_hget("z"); pika_hset("z1", tostring(x)); return nil, "wrong xxx"'
-// 说明 透过pika_hset可以设置hash的field对应的值，透过pika_hget可以获取hash的field对应的值
+调用pika_hset可以设置hash的field对应的值，调用pika_hget可以获取hash的field对应的值
 ```
 
 ##### bnheval scriptname hashkey args
