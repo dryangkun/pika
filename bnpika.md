@@ -31,15 +31,18 @@ offset保证是递增（字典序）
 ```
 存储lua脚本内容
 bnhscriptload test_script 'local x1 = ARGS[1]; pika_hset("z", tostring(x1)); local x = pika_hget("z"); pika_hset("z1", tostring(x)); return nil, "wrong xxx"'
+格式： bnhscriptload {脚本名称} {lua脚本内容}
 注意一：整个lua脚本的执行期间会对hash结构上排他锁，命令执行完成后解锁
 注意二：pika_hset可以设置hash的field对应的值，调用pika_hget可以获取hash的field对应的值，输入的数据从ARGS数组读取
 注意三：pika_hset的执行是批量的，因此对某个filed先执行pika_hset，在pika_hget，会发现值并不是刚pika_hset的值，而是执行命令前的值-因为数据写入是在命令执行的最后
+注意四：return 一般情况下直接return想要返回的值即可，如果是脚本的错误，参考例子return nil, "错误信息"
 ```
 
 ##### bnheval scriptname hashkey args
 ```
 调用lua脚本操作hash
 bnheval test_script k 1 2 3 4
+格式： bnheval {脚本名称} {hash的key} args...
 注意一：k为hash的key，后面跟随的是lua的参数，使用ARGS数组接收即可
 ```
 
