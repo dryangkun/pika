@@ -38,6 +38,7 @@ bnhscriptload test_script 'pika_hset("z", 1234); local x = pika_hget("z"); pika_
 ```
 调用lua脚本操作hash
 bnheval test_script k 1 2 3 4
+k为hash的key，后面跟随的是lua的参数，使用ARGS数组接收即可
 ```
 
 ##### 例：bnhistoryrange的lua实现
