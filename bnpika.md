@@ -35,7 +35,7 @@ bnhscriptload test_script 'local x1 = ARGS[1]; pika_hset("z", tostring(x1)); loc
 注意一：整个lua脚本的执行期间会对hash结构上排他锁，命令执行完成后解锁
 注意二：pika_hset可以设置hash的field对应的值，调用pika_hget可以获取hash的field对应的值，输入的数据从ARGS数组读取
 注意三：pika_hset的执行是批量的，因此对某个filed先执行pika_hset，在pika_hget，会发现值并不是刚pika_hset的值，而是执行命令前的值-因为数据写入是在命令执行的最后
-注意四：return 一般情况下直接return想要返回的值即可，如果是脚本的错误，参考例子return nil, "错误信息"
+注意四：return 一般情况下直接return想要返回的值即可，如果想要返回错误，参考例子return nil, "错误信息"
 ```
 
 ##### bnheval scriptname hashkey args
