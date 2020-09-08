@@ -45,7 +45,7 @@ offset保证是递增（字典序）
 注意一：k为hash的key，后面跟随的是lua的参数，使用ARGS数组接收即可
 ```
 
-##### 例：bnhistoryrange的lua实现
+###### 例：bnhistoryrange的lua实现
 ```
 bnhscriptload bnhistoryrange "
 local old_id = ARGS[1]
