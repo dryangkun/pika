@@ -112,7 +112,8 @@ void BNStreamCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const pt
 }
 
 void BNStreamCmd::Do() {
-  //key + chr(255) + '0' + 递增的offset
+  //key + chr(255) + '0' + 8byte(启动时间) + 16byte(counter)
+  //主从切换，写不同的机器，客户端要通过key来保持不一样，scan时要进行多次扫描
 
   std::string prefix;
   prefix.reserve(key_.size() + 2 + 16);
@@ -125,10 +126,7 @@ void BNStreamCmd::Do() {
   char id_bytes[17];
   sprintf(id_bytes, "%08"
   PRIx32
-  "%08"
-  PRIx32
   "",
-    (uint32_t) std::stoi(g_pika_conf->server_id()),
     g_pika_server->BNStreamOffset());
   prefix.append(id_bytes);
 
