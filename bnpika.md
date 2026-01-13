@@ -15,7 +15,7 @@ bnhmax来说，原有值如果小于新值，则写入新值，并且返回0，�
 
 ##### bnstream(key, val1, val2...)
 ```
-类似kafka方式，允许消息可以重复消费，举例说明：
+类似kafka方式，允许消息可以重复消费，数据保存7天，举例说明：
 
 bnstream("a", "1", "2", "3")，则最终生成的kv数据如下：
 
@@ -43,42 +43,4 @@ offset保证是递增（字典序）
 作用：调用lua脚本操作hash
 示例：bnheval test_script k 1 2 3 4
 注意一：k为hash的key，后面跟随的是lua的参数，使用ARGS数组接收即可
-```
-
-###### 例：bnhistoryrange的lua实现
-```
-bnhscriptload bnhistoryrange "
-local old_id = ARGS[1];
-local history_field = ARGS[2];
-local value = tonumber(ARGS[3]);
-local range = tonumber(ARGS[4]);
-local ival = pika_hget(history_field);
-local tmp_flag = false;
-local code = 0;
-local iival = tonumber(ival);
-if(ival) then 
-    if(value > iival) then
-        pika_hset(history_field, tostring(value));
-            if (value - iival > range) then -- 超出范围时需要old_id的值为第一条才能返回值1
-                    tmp_flag = true;
-            end
-    end
-else
-    pika_hset(history_field, tostring(value)); -- 历史字段为第一条时只要old_id的值为第一条即可返回值1（正常情况下）
-    tmp_flag = true
-end
-
-local oival = pika_hget(old_id);
-if (not oival) then -- 如果母游戏维度不存在值则设置，且离上次的时间超出范围则返回值为1
-    pika_hset(old_id,tostring(value));
-    if (tmp_flag) then 
-        code = 1;
-    end
-end
-return code;"
-//本逻辑只能处理同一母游戏的第一条数据 后续的数据就算时间相同也无法处理 因为历史时间字段已经更新的缘故 无法进行判断 除非增加field记录下该母游戏为符合规则的数据
-```
-###### 使用
-```
-bnheval bnhistoryrange u_1 y history 1 15
 ```
