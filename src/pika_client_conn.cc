@@ -178,7 +178,7 @@ std::string PikaClientConn::DoCmd(const PikaCmdArgsType& argv,
       uint64_t logic_id = 0;
       g_pika_server->logger_->GetProducerStatus(&filenum, &offset, &logic_id);
 
-      //start ibn
+      //start ibn bnstream的binlog写成bnmsetex，避免从库记录错误的offset
       std::string binlog;
       if (opt == kCmdNameBNStream) {
         binlog = c_ptr->ToBinlog(*c_ptr->res().new_argv,
