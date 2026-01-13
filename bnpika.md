@@ -1,3 +1,7 @@
+## 版本
+
+是基于[pikiwidb](https://github.com/OpenAtomFoundation/pikiwidb/tree/v3.0.16)开发而来，增加以下的命令
+
 ### 新增命令说明
 ##### bnhmin/bnhmax(key, field, int)
 ```
