@@ -212,7 +212,6 @@ const std::string kCmdNameBNHMin = "bnhmin";
 const std::string kCmdNameBNHMax = "bnhmax";
 const std::string kCmdNameBNStream = "bnstream";
 const std::string kCmdNameBNMSetex = "bnmsetex";
-const std::string kCmdNameBNHistoryRange = "bnhistoryrange";
 const std::string kCmdNameBNHScriptLoad = "bnhscriptload";
 const std::string kCmdNameBNHEval = "bnheval";
 //end ibn

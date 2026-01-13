@@ -64,37 +64,6 @@ void BNHMaxCmd::Do() {
   return;
 }
 
-void BNHistoryRangeCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const ptr_info) {
-  if (!ptr_info->CheckArg(argv.size())) {
-    res_.SetRes(CmdRes::kWrongNum, kCmdNameBNHistoryRange);
-    return;
-  }
-  key_ = argv[1];
-  fields.clear();
-  fields.push_back(argv[3].data());
-  fields.push_back(argv[2].data());
-  if (!slash::string2l(argv[4].data(), argv[4].size(), &value_)) {
-    res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHistoryRange);
-    return;
-  }
-  if (!slash::string2l(argv[5].data(), argv[5].size(), &r_val_)) {
-    res_.SetRes(CmdRes::kInvalidInt, kCmdNameBNHistoryRange);
-    return;
-  }
-  return;
-}
-
-void BNHistoryRangeCmd::Do() {
-  int32_t ret = 0;
-  rocksdb::Status s = g_pika_server->db()->BNHistoryRange(key_, fields, value_, r_val_, &ret);
-  if (s.ok()) {
-    res_.AppendContent(":" + std::to_string(ret));
-  } else {
-    res_.SetRes(CmdRes::kErrOther, s.ToString());
-  }
-  return;
-}
-
 static std::string streamValueTTLStr("604800");
 static int32_t streamValueTTL = 604800;
 

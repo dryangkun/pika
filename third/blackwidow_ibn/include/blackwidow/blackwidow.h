@@ -421,11 +421,9 @@ class BlackWidow {
                        const Slice& pattern, int32_t limit,
                        std::vector<FieldValue>* field_values, std::string* next_field);
 
-  //start ibn
+  //ibn start
   Status BNHMinOrMax(const Slice& key, const Slice& field, int64_t value,
                      int32_t* res, bool is_min);
-  Status BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
-                      int64_t value, int64_t r_val, int32_t *ret);
   Status BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl);
 
   Status BNHScriptLoad(const Slice& luaKey, const Slice& luaScript, int32_t* res);
@@ -433,7 +431,7 @@ class BlackWidow {
   Status BNHEval(const Slice& luaKey, const Slice& key,
                  const std::vector<std::string>& args,
                  std::vector<std::string>* ret);
-  //end ibn
+  //ibn end
 
   // Sets Commands
 

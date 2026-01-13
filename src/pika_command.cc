@@ -250,9 +250,6 @@ void InitCmdInfoTable() {
   ////BNMSetex
   CmdInfo* msetexptr = new CmdInfo(kCmdNameBNMSetex, -4, kCmdFlagsWrite | kCmdFlagsKv);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNMSetex, msetexptr));
-  ////BNHistoryRange
-  CmdInfo* bnhistoryrangeptr = new CmdInfo(kCmdNameBNHistoryRange, 6, kCmdFlagsWrite | kCmdFlagsHash);
-  cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHistoryRange, bnhistoryrangeptr));
   ////BNHScriptLoad
   CmdInfo* bnhscriptloadpter = new CmdInfo(kCmdNameBNHScriptLoad, 3, kCmdFlagsWrite | kCmdFlagsHash);
   cmd_infos.insert(std::pair<std::string, CmdInfo*>(kCmdNameBNHScriptLoad, bnhscriptloadpter));
@@ -715,8 +712,6 @@ void InitCmdTable(std::unordered_map<std::string, Cmd*> *cmd_table) {
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNStream, streamptr));
   Cmd* msetexptr = new BNMSetexCmd();
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNMSetex, msetexptr));
-  Cmd* bnhistoryrangeptr = new BNHistoryRangeCmd();
-  cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHistoryRange, bnhistoryrangeptr));
   Cmd* bnhscriptloadptr = new BNHScriptLoadCmd();
   cmd_table->insert(std::pair<std::string, Cmd*>(kCmdNameBNHScriptLoad, bnhscriptloadptr));
   Cmd* bnhevalptr = new BNHEvalCmd();

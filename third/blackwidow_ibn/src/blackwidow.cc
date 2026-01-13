@@ -373,15 +373,10 @@ Status BlackWidow::PKHRScanRange(const Slice& key, const Slice& field_start,
       field_end, pattern, limit, field_values, next_field);
 }
 
-//start ibn
+//ibn start
 Status BlackWidow::BNHMinOrMax(const Slice& key, const Slice& field,
                                int64_t value, int32_t* res, bool is_min) {
   return hashes_db_->BNHMinOrMax(key, field, value, res, is_min);
-}
-
-Status BlackWidow::BNHistoryRange(const Slice &key, const std::vector<std::string> &fields,
-                      int64_t value, int64_t r_val, int32_t *ret) {
-  return hashes_db_->BNHistoryRange(key, fields, value, r_val, ret);
 }
 
 Status BlackWidow::BNMSetex(const std::vector<KeyValue>& kvs, int32_t ttl) {
@@ -403,7 +398,7 @@ Status BlackWidow::BNHEval(const Slice& luaKey, const Slice& key,
   lua_State* L = luaUtil_->StateOpen();
   return hashes_db_->BNHEval(L, luaScript, key, args, ret);
 }
-//end ibn
+//ibn end
 
 // Sets Commands
 Status BlackWidow::SAdd(const Slice& key,
