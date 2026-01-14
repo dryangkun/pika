@@ -148,7 +148,9 @@ am__v_CCLD_1 =
 
 AM_LINK = $(AM_V_CCLD)$(CXX) $^ $(EXEC_LDFLAGS) -o $@ $(LDFLAGS)
 
+# ibn start 加上表示信息，编译会出现OOM的问题
 # CXXFLAGS += -g
+# ibn end
 
 # This (the first rule) must depend on "all".
 default: all
