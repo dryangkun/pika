@@ -81,7 +81,7 @@ void BNStreamCmd::DoInitial(const PikaCmdArgsType &argv, const CmdInfo *const pt
 }
 
 void BNStreamCmd::Do() {
-  //key + chr(255) + '0' + 8byte(启动时间) + 16byte(counter)
+  //key + chr(255) + '0' + 8byte(启动时间) + 16byte(counter十六进制)，差不多30天会重置启动时间和counter
   //主从切换，写不同的机器，客户端要通过key来保持不一样，scan时要进行多次扫描
 
   std::string prefix;
