@@ -28,6 +28,8 @@ key . chr(255) . offset
 "a" . chr(255) . "0000000015d1ae26a0000000000000001" => "2"
 "a" . chr(255) . "0000000015d1ae26a0000000000000002" => "3"
 offset保证是递增（字典序）
+
+读取使用命令 = pkscanrange string/string_with_value 'a'.chr(255).'0' '' limit 10
 ```
 
 ##### hash结构的lua支持
